@@ -44,7 +44,7 @@ Specifically, I need to demonstrate:
 
 ##### The project to demonstrate Part 2 steps
 
-I haved used Python to run a correlation analysis on some made-up data and visualise the correlation with a scatter plot. I've broken this down below, with screenshots.
+I have used Python to run a correlation analysis on some made-up data and visualise the correlation with a scatter plot. I've broken this down below, with screenshots.
 
 1. After creating this remote repository on GitHub, I created a local copy on my machine using `git clone`.
 3. I then created a Python script that creates two columns and stores them in a [pandas](https://pandas.pydata.org/) data frame.
