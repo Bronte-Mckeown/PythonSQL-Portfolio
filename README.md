@@ -47,7 +47,7 @@ Specifically, I need to demonstrate:
 I have used Python to run a correlation analysis on some made-up data and visualise the correlation with a scatter plot. I've broken this down below, with screenshots.
 
 1. After creating this remote repository on GitHub, I created a local copy on my machine using `git clone`.
-3. I then created a Python script that creates two columns and stores them in a [pandas](https://pandas.pydata.org/) data frame.
+3. I then created a Python script that reads in data I collected during my PhD (two continuous variables) and stores them in a [pandas](https://pandas.pydata.org/) data frame.
 4. I then used `git add` and `git commit` to document this step. I also used `git status` to check this worked.
 5. I then correlated the two columns of interest using [panda's](https://pandas.pydata.org/) [.corr()](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.corr.html) function.
     - The result is printed out to the console using `print()` statement.
