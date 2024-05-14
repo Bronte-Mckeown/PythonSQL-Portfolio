@@ -13,3 +13,7 @@ result = x.corr(y)
 
 # Print result to console
 print(result)
+
+# Store x and y in dataframe and save as csv
+df = pd.concat([x, y], axis=1)
+df.to_csv("data.csv")
