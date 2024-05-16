@@ -100,6 +100,6 @@ To demonstrate the skills required for Part 2, I have used Python to run a corre
 ![gitpull](assignment1/screenshots/git_pull.png)
     
 
-**9. I also created a .gitignore file using `touch`. This file tells git to *not* track the changes of any files or directories listed. In my case, I added the homework instructions word document and the csv filed (data.csv) created by the correlation.py script.**
+**9. I also created a [.gitignore file](.gitignore) using `touch`. This file tells git to *not* track the changes of any files or directories listed. In my case, I added the homework instructions word document and the csv filed (data.csv) created by the correlation.py script.**
 
 **10. Finally, I created a [requirements.txt](assignment1/requirements.txt) file using `pip freeze`, which lists all the modules and packages (and their versions) loaded in my environment, and can be used by users of the project to install all the necessary modules and packages needed to run the analysis scripts.**
