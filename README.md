@@ -63,7 +63,9 @@ To demonstrate the skills required for Part 2, I have used Python to run a corre
 
 ![gitadd](assignment1/screenshots/git_add1.png)
 
-**5. I then created a new branch called 'plot-dev' and switched to this branch. In this branch, I wrote a new [Python script](assignment1/scatterplot.py) that plots a scatter plot showing the association between the two same two variables using [seaborn's](https://seaborn.pydata.org/index.html) [.scatterplot()](https://seaborn.pydata.org/generated/seaborn.scatterplot.html) function.**
+![gitcommit](assignment1/screenshots/git_commit.png)
+
+**5. I then created a new branch called 'plot-dev' using `git checkout` and switched to this branch using the `-b` flag. In this branch, I wrote a new [Python script](assignment1/scatterplot.py) that plots a scatter plot showing the association between the two same two variables using [seaborn's](https://seaborn.pydata.org/index.html) [.scatterplot()](https://seaborn.pydata.org/generated/seaborn.scatterplot.html) function.**
 
 ![newbranch](assignment1/screenshots/new_branch.png)
    
