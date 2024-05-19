@@ -96,7 +96,7 @@ To demonstrate the skills required for Part 2, I have used Python to run a corre
     
 
     
-**8. I then used `git fetch` (not shown) and `git pull` on my local machine to reflect this merging.**
+**8. I then used `git pull` on my local machine to reflect this merging.**
 
 
 ![gitpull](assignment1/screenshots/git_pull.png)
