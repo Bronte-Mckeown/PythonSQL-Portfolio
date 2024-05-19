@@ -59,7 +59,7 @@ To demonstrate the skills required for Part 2, I have used Python to run a corre
 
 ![gitstatus1](assignment1/screenshots/git_status1.png)
 
-**4. I then used `git add` to add this change to the staging area and `git commit` (not shown) to commit this change to my git history with a message.**
+**4. I then used `git add` to add this change to the staging area and `git commit` to commit this change to my git history with a message.**
 
 ![gitadd](assignment1/screenshots/git_add1.png)
 
