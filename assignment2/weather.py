@@ -175,10 +175,11 @@ my_key = open("api_key.txt", "r").readline().rstrip()
 
 # Ask User what City they want to see Weather for, use capitalize method 
 # to ensure it's in a nice format in the output table
-user_city = input("""What City would you like to know the weather for? Type here: """).capitalize()
+user_city = input("What City would you like to know the weather for? "
+                  "Type here: ").capitalize()
 
 # Let user know what they have selected.
-print (f"\nYou selected {user_city}.\n")
+print (f"\nYou selected {user_city}.")
 
 # Create full URL using api_key variable and city from user input
 city_url = join_url(my_key, user_city, base_url)
@@ -188,20 +189,21 @@ city_response = requests.get(city_url).json()
 
 # Ask User if they want to see the full city name or an abbreviation
 # Make lower case so you can safely use in if/else statement below
-view_option = input("""\nIn the output, would you like to see the full city name or an abbreviation? Type 'full' or 'abbrev': """).lower()
+view_option = input("\nIn the output, would you like to see the full city name"
+                    "or an abbreviation? Type 'full' or 'abbrev': ").lower()
 
 # Use if/else statement to set display city name based on User selection
 if view_option == 'full':
     # If full, stays the same
     display_city_name = user_city
     # Let user know what they have selected.
-    print ("\nYou selected to see the full city name in the output.\n")
+    print ("\nYou selected to see the full city name in the output.")
 
 elif view_option == 'abbrev':
     # If they want abbreviation, select first three characters
     display_city_name = user_city[:3]
     # Let user know what they have selected.
-    print ("\nYou selected to see an abbreviation of city name in the output.\n")
+    print ("\nYou selected to see an abbreviation of city name in the output.")
 
 # If they enter incorrectly, default to full name with printed warning
 else:
@@ -223,7 +225,8 @@ random_selection_selected = False
 while random_selection_selected == False:
 
     # Ask User if they want a random city selection
-    random_selection = input("""\nWould you like to get the weather for a random City? Type 'yes' or 'no': """).lower()
+    random_selection = input("\nWould you like to get the weather"
+                            "for a random City? Type 'yes' or 'no': ").lower()
 
     # If User selects yes, randomly select a City from list
     if random_selection == 'yes':
@@ -232,7 +235,7 @@ while random_selection_selected == False:
         random_selection_selected =  True
 
         # Let user know what they have selected.
-        print ("\nYou selected  to see a random city too.\n")
+        print ("\nYou selected  to see a random city too.")
         
         # Create list of possible cities to randomly chose from
         # For efficiency, only created if user selects yes
@@ -263,12 +266,13 @@ while random_selection_selected == False:
         random_selection_selected =  True
 
         # Let user know what they have selected.
-        print ("\nYou selected to NOT see a random city.\n")
+        print ("\nYou selected to NOT see a random city.")
 
     else:
         # If not yes or no, tell user to try again.
         # Random selection selected stays false so question asked again.
-        print("""\nPlease try again. Input should either be: Type 'yes' or 'no'.""")
+        print("\nPlease try again. Input should either be:"
+                "Type 'yes' or 'no'.")
 
 """
 We now want to ask user if they want a full report
@@ -285,10 +289,11 @@ report_type_selected = False
 while report_type_selected == False:
 
     # Ask User for report type (full or just temperature)
-    report_type = input("""\nWould you like a (1) full weather report or (2) just temperature? Type 1 or 2: """)
+    report_type = input("\nWould you like a (1) full weather report or"
+                        "(2) just temperature? Type 1 or 2: ")
 
     # If 1 or 2 selected, set report_type_selected to True
-    if int(report_type) == 1:
+    if report_type == 1:
 
         # Let user know what they have selected.
         print ("\nYou selected full report.\n")
@@ -307,14 +312,16 @@ while report_type_selected == False:
             full_table = add_full_row(full_table, random_city, random_response)
 
         # Print the full_table to user
-        print (full_table)
+        print(full_table)
 
+        # Save the full_table as a csv to current directory
         write_table_to_csv(full_table)
 
-    elif int(report_type) == 2:
+    # If equal to 2, make temp only table
+    elif report_type == 2:
 
         # Let user know what they have selected.
-        print ("\nYou selected temperature only.\n")
+        print ("\nYou selected temperature only.")
 
         # Set report_type_selected to True (breaks loop)
         report_type_selected = True
@@ -329,12 +336,13 @@ while report_type_selected == False:
         if random_selection == 'yes':
             temp_table = add_temp_row(temp_table, random_city, random_response)
 
-         # Print the temp_table to user
+        # Print the temp_table to user
         print (temp_table)
 
+        # Save the temp_table as a csv to current directory
         write_table_to_csv(temp_table)
 
     else:
         # If not 1 or 2, tell user to try again.
         # Report type selected stays false so question asked again.
-        print("""\nPlease try again. Input should either be: 1 or 2.\n""")
+        print("\nPlease try again. Input should either be: 1 or 2.\n")
