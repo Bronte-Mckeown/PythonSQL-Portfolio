@@ -25,6 +25,11 @@ to install 'requests' and 'prettytable' in terminal.
 
 Note: prettytable is for making printed tables more readable!
 
+LLM note: Chat GPT used to help improve doc strings for functions.
+    - Specifically, used to do 'Parameters' and 'Returns' to save time.
+    - Prompt: "Finish the doc string for this function:"
+    - Edited where necessary to be accurate and/or clearer.
+
 """
 ##########################################################################
 
@@ -33,6 +38,7 @@ import random
 import requests
 from prettytable import PrettyTable
 from datetime import datetime as dt
+import sys
 
 ##########################################################################
 
@@ -70,25 +76,31 @@ def convert_celsius(kelvin_):
 
     return celsius
 
-def full_table_field_names():
+def create_table(full_report = True):
     """
-    Creates a full weather report table with predefined field names.
+    Creates a weather report table with provided field names.
 
     Returns:
     PrettyTable: An empty PrettyTable object with field names set for a weather report.
     """
     # Create empty pretty table to add to
-    table = PrettyTable()
+    table_ = PrettyTable()
 
-    # Add field names to table
-    table.field_names = ["City", "Summary", "Actual Temp",
+    if full_report:
+        # Add full field names to table
+        table_.field_names = ["City", "Summary", "Actual Temp",
                         "Feels like", "Temp Min", "Temp Max",
                         "Pressure", "Humidity", "Visibility",
                         "Wind Speed"]
-    
-    return table
 
-def add_full_row(full_table_, city_, response_):
+    else:
+        table_.field_names = ["City", "Actual Temp",
+                        "Feels like", "Temp Min", "Temp Max"
+                        ]
+        
+    return table_
+
+def add_row(table_, city_, response_, full_report = True):
     """
     Adds a row of weather data to the provided full table.
 
@@ -98,57 +110,28 @@ def add_full_row(full_table_, city_, response_):
     city_ (str): The name of the city for which the weather data is provided.
     response_ (dict): The API response containing weather data for the city.
     """
-    # Add row where city is used as value in first column
-    # The rest of the columns are filled by accessing response
-    full_table_.add_row([city_,
-                response_['weather'][0]['main'],
-                convert_celsius(response_['main']['temp']),
-                convert_celsius(response_['main']['feels_like']),
-                convert_celsius(response_['main']['temp_min']),
-                convert_celsius(response_['main']['temp_max']),
-                response_['main']['pressure'],
-                response_['main']['humidity'],
-                response_['visibility'],
-                response_['wind']['speed']])
-    
-    return full_table_
-
-def temp_table_field_names():
-    """
-    Creates a temperature-only report table with predefined field names.
-
-    Returns:
-    PrettyTable: An empty PrettyTable object with field names set for temp report.
-    """
-    # Create empty pretty table to add to
-    table_ = PrettyTable()
-
-    # Add field names to table
-    table_.field_names = ["City", "Actual Temp",
-                        "Feels like", "Temp Min", "Temp Max"
-                        ]
-    
-    return table_
-
-def add_temp_row(temp_table_, city_, response_):
-    """
-    Adds a row of temperature data to the provided temperature-only table.
-
-    Parameters:
-    temp_table_ (PrettyTable): The table to which the row will be added. This table should have predefined field names.
-    city_ (str): The name of the city for which the temperature data is provided.
-    response_ (dict): The API response containing temperature data for the city.
-    """
-    # Add row where city is used as value in first column
-    # The rest of the columns are filled by accessing response
-    temp_table_.add_row([city_,
+    if full_report:
+        # Add row where city is used as value in first column
+        # The rest of the columns are filled by accessing response
+        table_.add_row([city_,
+                    response_['weather'][0]['main'],
+                    convert_celsius(response_['main']['temp']),
+                    convert_celsius(response_['main']['feels_like']),
+                    convert_celsius(response_['main']['temp_min']),
+                    convert_celsius(response_['main']['temp_max']),
+                    response_['main']['pressure'],
+                    response_['main']['humidity'],
+                    response_['visibility'],
+                    response_['wind']['speed']])
+    else:
+        table_.add_row([city_,
                 convert_celsius(response_['main']['temp']),
                 convert_celsius(response_['main']['feels_like']),
                 convert_celsius(response_['main']['temp_min']),
                 convert_celsius(response_['main']['temp_max'])]
                 )
-    
-    return temp_table_
+        
+    return table_
 
 def write_table_to_csv(table_):
     """
@@ -173,9 +156,11 @@ base_url = "http://api.openweathermap.org/data/2.5/weather?"
 # Use .rstrip() to prevent python reading in newline character!
 my_key = open("api_key.txt", "r").readline().rstrip()
 
+##########################################################################
+
 # Ask User what City they want to see Weather for, use capitalize method 
 # to ensure it's in a nice format in the output table
-user_city = input("What City would you like to know the weather for? "
+user_city = input("\nWhat City would you like to know the weather for? "
                   "Type here: ").capitalize()
 
 # Let user know what they have selected.
@@ -185,11 +170,24 @@ print (f"\nYou selected {user_city}.")
 city_url = join_url(my_key, user_city, base_url)
 
 # Use requests module to retrieve data from provided city URL
-city_response = requests.get(city_url).json()
+city_response = requests.get(city_url)
+
+# If status code indicates error, print message to User and stop program
+# This prevents user from progressing any further if request hasn't worked
+status_code = city_response.status_code 
+if status_code != 200:
+    print(f"\nError: The API request has failed (code: {status_code}) "
+          "You may have mis-spelt the city name. Try again.\n")
+    sys.exit()
+
+# Convert to json format after if code indicates if has worked
+city_response = city_response.json()
+
+##########################################################################
 
 # Ask User if they want to see the full city name or an abbreviation
 # Make lower case so you can safely use in if/else statement below
-view_option = input("\nIn the output, would you like to see the full city name"
+view_option = input("\nIn the output, would you like to see the full city name "
                     "or an abbreviation? Type 'full' or 'abbrev': ").lower()
 
 # Use if/else statement to set display city name based on User selection
@@ -210,6 +208,8 @@ else:
     print("\nYou entered an invalid selection. Defaulting to full name.")
     display_city_name = user_city
 
+##########################################################################
+
 """
 We now want to ask user if they want a random
 city's weather to be shown as well.
@@ -225,7 +225,7 @@ random_selection_selected = False
 while random_selection_selected == False:
 
     # Ask User if they want a random city selection
-    random_selection = input("\nWould you like to get the weather"
+    random_selection = input("\nWould you like to get the weather "
                             "for a random City? Type 'yes' or 'no': ").lower()
 
     # If User selects yes, randomly select a City from list
@@ -262,6 +262,7 @@ while random_selection_selected == False:
 
     # If random_selection is no, then let User know and break loop.
     elif random_selection == 'no':
+        
         # Set to true to break the loop
         random_selection_selected =  True
 
@@ -271,9 +272,10 @@ while random_selection_selected == False:
     else:
         # If not yes or no, tell user to try again.
         # Random selection selected stays false so question asked again.
-        print("\nPlease try again. Input should either be:"
+        print("\nPlease try again. Input should either be: "
                 "Type 'yes' or 'no'.")
 
+##########################################################################
 """
 We now want to ask user if they want a full report
 or just the temperature.
@@ -289,11 +291,11 @@ report_type_selected = False
 while report_type_selected == False:
 
     # Ask User for report type (full or just temperature)
-    report_type = input("\nWould you like a (1) full weather report or"
+    report_type = input("\nWould you like a (1) full weather report or "
                         "(2) just temperature? Type 1 or 2: ")
 
     # If 1 or 2 selected, set report_type_selected to True
-    if report_type == 1:
+    if report_type == '1':
 
         # Let user know what they have selected.
         print ("\nYou selected full report.\n")
@@ -302,23 +304,20 @@ while report_type_selected == False:
         report_type_selected = True
 
         # Call function to create full table with field names
-        full_table = full_table_field_names()
+        table = create_table()
 
         # Call function to add row of data to full table for user_city
-        full_table = add_full_row(full_table, display_city_name, city_response)
+        table = add_row(table, display_city_name, city_response)
         
         # If user has asked for random city, add row of data for random_city
         if random_selection == 'yes':
-            full_table = add_full_row(full_table, random_city, random_response)
+            table = add_row(table, random_city, random_response)
 
         # Print the full_table to user
-        print(full_table)
-
-        # Save the full_table as a csv to current directory
-        write_table_to_csv(full_table)
+        print(table)
 
     # If equal to 2, make temp only table
-    elif report_type == 2:
+    elif report_type == '2':
 
         # Let user know what they have selected.
         print ("\nYou selected temperature only.")
@@ -327,22 +326,22 @@ while report_type_selected == False:
         report_type_selected = True
 
         # Call function to create temp only table with field names
-        temp_table = temp_table_field_names()
+        table = create_table(full_report = False)
 
         # Call function to add row of data to temp only table for user_city
-        temp_table = add_temp_row(temp_table, user_city, city_response)
+        table = add_row(table, user_city, city_response, full_report = False)
 
          # If user has asked for random city, add row of data for random_city
         if random_selection == 'yes':
-            temp_table = add_temp_row(temp_table, random_city, random_response)
+            table = add_row(table, random_city, random_response, full_report = False)
 
         # Print the temp_table to user
-        print (temp_table)
-
-        # Save the temp_table as a csv to current directory
-        write_table_to_csv(temp_table)
+        print (table)
 
     else:
         # If not 1 or 2, tell user to try again.
         # Report type selected stays false so question asked again.
         print("\nPlease try again. Input should either be: 1 or 2.\n")
+
+# Save the full_table as a csv to current directory
+write_table_to_csv(table)
