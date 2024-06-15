@@ -1,19 +1,22 @@
--- This university database contains 7 tables.
+-- This assignment creates a university database.
+
+-- Create database. 
 CREATE DATABASE university;
 
+-- Use database.
 USE university;
 
--- The departments table contains department ID and name.
--- The ID must start with a 2 and be 4 characters.
+-- Create 'departments' table.
+-- Contains department ID (primary key) and department name.
+-- The department ID must (1) start with a 2 and (2) be 4 characters.
+-- The department name must be unique and not null.
 CREATE TABLE departments(
 	department_id CHAR(4) PRIMARY KEY,
     department_name VARCHAR(200) UNIQUE NOT NULL,
     CHECK (department_id LIKE '2%')
 );
 
--- DROP TABLE departments; 
-
---  Insert departments into table.
+--  Insert departments into departments table.
 INSERT INTO departments(department_id, department_name)
 VALUES
 ('2478', 'Psychology'),
@@ -27,74 +30,89 @@ VALUES
 ('2486', 'Economics'),
 ('2487', 'Philosophy');
 
--- Return all department names, ordered by name
-SELECT department_name 
+-- Select all to look at insertion.
+SELECT * 
 FROM departments
 ORDER BY department_name;
 
--- Return all department names that begin with P
--- ordered by name 
+-- Return all department names.
 SELECT department_name
+AS 'Department'
+FROM departments
+ORDER BY department_name;
+
+-- Return all department names that begin with P.
+SELECT department_name
+AS 'Department'
 FROM departments
 WHERE department_name LIKE 'P%'
 ORDER BY department_name;
 
 -- Count how many departments there are in table.
 SELECT COUNT(department_id) 
-AS total_departments 
+AS 'Total Departments'
 FROM departments;
 
--- Create school table 
+-- Create 'schools' table.
+-- Contains school ID (primary key) and school name.
+-- School ID must start with 6 and be 4 characters.
+--  School name must be unique and not null.
 CREATE TABLE schools(
 	school_id CHAR(4) PRIMARY KEY,
     school_name VARCHAR(100) UNIQUE NOT NULL,
     CHECK (school_id LIKE '6%')
 );
 
+-- Insert data into schools table. 
 INSERT INTO schools(school_id, school_name)
 VALUES
 ('6000', 'STEM'),
 ('6001', 'Social Science'),
 ('6002', 'Humanities');
 
--- Create table linking departments to schools 
+-- Create 'department_affiliation' table that links
+-- department IDs and school IDs (both foreign keys). 
+-- Make them both a composite primary key.
 CREATE TABLE department_affiliation(
-	department_name VARCHAR(200) PRIMARY KEY,
-    school_name VARCHAR(100),
-    INDEX dep_name (department_name),
-    FOREIGN KEY (department_name) 
-		REFERENCES departments(department_name)
+	department_id CHAR(4),
+    school_id CHAR(4),
+    INDEX dep_id (department_id),
+    FOREIGN KEY (department_id) 
+		REFERENCES departments(department_id)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
-	INDEX sch_name (school_name),
-    FOREIGN KEY (school_name) 
-		REFERENCES schools(school_name)
+	INDEX sch_id (school_id),
+    FOREIGN KEY (school_id) 
+		REFERENCES schools(school_id)
         ON DELETE CASCADE
-        ON UPDATE CASCADE
+        ON UPDATE CASCADE,
+	PRIMARY KEY (department_id, school_id)
 );
 
 -- DROP TABLE department_affiliation;
 
-INSERT INTO department_affiliation(department_name, school_name)
+-- Insert IDs into department_affiliation table. 
+INSERT INTO department_affiliation(department_id, school_id)
 VALUES
-('Psychology', 'Social Science'),
-('Sociology', 'Social Science'),
-('Biology', 'STEM'),
-('Chemistry', 'STEM'),
-('Physics', 'STEM'),
-('Mathematics', 'STEM'),
-('History', 'Humanities'),
-('Political Science', 'Social Science'),
-('Economics', 'Social Science'),
-('Philosophy', 'Humanities');
+('2478', '6001'), 
+('2479', '6001'),
+('2480', '6000'),
+('2481', '6000'),
+('2482', '6000'),
+('2483', '6000'),
+('2484', '6002'),
+('2485', '6001'),
+('2486', '6001'),
+('2487', '6002');
 
+-- Create 'students' table. 
 -- The students table contains student ID, first and last names,
 -- DOB, email address, and which department they belong in.
 -- Student ID must start with 4 and be 4 characters long.
 -- Names,  DOB (date) and emails cannot be null.
 -- Email address must be unique.
 -- If department ID is deleted in parent table, set to null here.
--- If department ID is updated in parent table, updated here.  
+-- If department ID is updated in parent table, updated here.
 CREATE TABLE students(
 	student_id CHAR(4) PRIMARY KEY,
 	first_name VARCHAR(50) NOT NULL,
@@ -151,47 +169,54 @@ VALUES
 ('4511', 'scarlett', 'young', '2001-01-05', 'scarlett.young@gmail.com', '2479'),
 ('4512', 'elliot', 'young', '2001-01-05', 'elliot.young@gmail.com', '2480');
 
--- Check how many students there are overall
+-- Count how many students there are overall.
 SELECT COUNT(student_id) 
-AS total_students 
+AS 'Total Students'
 FROM students;
 
--- Return how many students are in each department
--- Use INNER join to return department name
--- This will ignore students with no department
-SELECT d.department_name, COUNT(student_id)
-AS department_students
-FROM students s
-INNER JOIN departments d 
-ON s.department = d.department_id
-GROUP BY d.department_name;
-
--- Add two students with no department affiliation 
+-- Add two students with no department affiliation.
 INSERT INTO students(student_id, first_name, last_name, dob, email_address)
 VALUES
 ('4972', 'lucy', 'walmes', '1992-12-01', 'lucy.walmes@gmail.com'),
 ('4973', 'jack', 'daniels', '1995-11-23', 'jack.daniels@gmail.com');
 
--- Return how many students are in each department
--- Use LEFT (outer) join to return department name
--- This will also count students with no department (null)
-SELECT d.department_name, COUNT(student_id)
-AS department_students
+-- Count how many students are in each department.
+-- Use INNER join to return department name.
+-- This will ignore students with no department.
+SELECT d.department_name
+		AS 'Department',
+		COUNT(student_id)
+		AS 'N Students'
+FROM students s
+INNER JOIN departments d 
+ON s.department = d.department_id
+GROUP BY d.department_name
+ORDER BY d.department_name;
+
+-- Count how many students are in each department.
+-- But this time, use LEFT (outer) join to return department name.
+-- This will also count students with no department (null).
+SELECT d.department_name
+		AS 'Department',
+		COUNT(student_id)
+		AS 'N Students'
 FROM students s
 LEFT JOIN departments d 
 ON s.department = d.department_id
 GROUP BY d.department_name
 ORDER BY d.department_name;
 
--- Return how many students are in each department within STEM school
-SELECT d.department_name, COUNT(student_id)
-AS department_students
+-- Return how many students are in each department within STEM school.
+SELECT d.department_name
+	AS 'Department',
+	COUNT(student_id)
+	AS 'N Students'
 FROM students st
 JOIN departments d 
 ON st.department = d.department_id
 JOIN department_affiliation dep_a
-ON d.department_name = dep_a.department_name
-WHERE dep_a.school_name = 'STEM'
+ON d.department_id = dep_a.department_id
+WHERE dep_a.school_id = '6000'
 GROUP BY d.department_name;
 
 -- Insert department IDs into student table using UPDATE
@@ -203,27 +228,17 @@ UPDATE students
 SET department = 2478
 WHERE student_id = '4973';
 
--- Check addition
-SELECT * FROM students;
+-- Check updates.
+SELECT department
+FROM students
+WHERE student_id IN ('4972', '4973');
 
--- Delete Philosophy from departments
-DELETE FROM departments
-WHERE department_name ='Philosophy'; 
-
--- Check deletion 
-SELECT * FROM departments;
-
--- There are now 9 departments, instead of 10 
-SELECT COUNT(department_name)
-FROM departments;
-
--- See effect on child tables
-SELECT * FROM students
-ORDER BY first_name;
-
-SELECT * FROM department_affiliation
-ORDER BY department_name, school_name;
-
+-- Create 'staff' table with staff IDs (primary key), first and last names,
+-- DOB, email address, date staff member joined, and their department. 
+-- Names, dob, email address and date joined can't be null.
+-- Staff ID has to start with 7 and be 4 characters.
+-- Department ID is foreign key from departments.
+-- On delete in parent table, set to null and cascade updates.  
 CREATE TABLE staff(
 	staff_id CHAR(4) PRIMARY KEY, 
     first_name VARCHAR(50) NOT NULL,
@@ -242,40 +257,98 @@ CREATE TABLE staff(
 
 -- DROP TABLE staff;
 
--- Again, gave CHAT-GPT the first 2 rows and asked for 27 more
+-- Insert data into staff table.
+-- Again, gave CHAT-GPT the first 2 rows and asked for 27 more to have more data to play with.
 INSERT INTO staff(staff_id, first_name, last_name, dob, email_address, date_joined, department)
 VALUES
 ('7789', 'Tony', 'Morland', '1965-11-02', 'tony.morland@york.ac.uk', '1997-05-04', '2478'),
-('7790', 'Emily', 'Brown', '1972-06-14', 'emily.brown@york.ac.uk', '2001-09-12', '2478'),
+('7790', 'Emily', 'Brown', '1972-06-14', 'emily.brown@york.ac.uk', '2023-09-12', '2478'),
 ('7791', 'John', 'Smith', '1980-08-25', 'john.smith@york.ac.uk', '2005-03-15', '2479'),
 ('7792', 'Jane', 'Doe', '1985-12-17', 'jane.doe@york.ac.uk', '2008-06-20', '2479'),
 ('7793', 'Michael', 'Johnson', '1978-01-03', 'michael.johnson@york.ac.uk', '2003-07-25', '2480'),
 ('7794', 'Sarah', 'Taylor', '1983-04-11', 'sarah.taylor@york.ac.uk', '2007-09-30', '2480'),
-('7795', 'David', 'Lee', '1975-10-09', 'david.lee@york.ac.uk', '2000-05-22', '2481'),
+('7795', 'David', 'Lee', '1975-10-09', 'david.lee@york.ac.uk', '2023-05-22', '2481'),
 ('7796', 'Laura', 'White', '1981-03-23', 'laura.white@york.ac.uk', '2006-11-17', '2481'),
 ('7797', 'James', 'Martin', '1969-09-07', 'james.martin@york.ac.uk', '1995-02-10', '2482'),
-('7798', 'Karen', 'Anderson', '1974-05-29', 'karen.anderson@york.ac.uk', '1999-08-05', '2482'),
+('7798', 'Karen', 'Anderson', '1974-05-29', 'karen.anderson@york.ac.uk', '1999-08-05', null),
 ('7799', 'Robert', 'Garcia', '1986-02-19', 'robert.garcia@york.ac.uk', '2010-04-12', '2483'),
 ('7800', 'Patricia', 'Martinez', '1982-11-30', 'patricia.martinez@york.ac.uk', '2009-06-28', '2483'),
 ('7801', 'Charles', 'Clark', '1970-07-16', 'charles.clark@york.ac.uk', '1996-01-18', '2484'),
-('7802', 'Linda', 'Lewis', '1979-03-05', 'linda.lewis@york.ac.uk', '2002-10-09', '2484'),
+('7802', 'Linda', 'Lewis', '1979-03-05', 'linda.lewis@york.ac.uk', '2023-10-09', '2484'),
 ('7803', 'Steven', 'Walker', '1981-08-27', 'steven.walker@york.ac.uk', '2006-12-14', '2485'),
 ('7804', 'Jessica', 'Hall', '1987-05-12', 'jessica.hall@york.ac.uk', '2011-03-21', '2485'),
 ('7805', 'George', 'Allen', '1968-01-22', 'george.allen@york.ac.uk', '1994-07-16', '2486'),
-('7806', 'Nancy', 'Young', '1973-09-13', 'nancy.young@york.ac.uk', '1998-08-24', '2486'),
+('7806', 'Nancy', 'Young', '1973-09-13', 'nancy.young@york.ac.uk', '2022-08-24', '2486'),
 ('7807', 'Brian', 'King', '1976-04-03', 'brian.king@york.ac.uk', '2001-11-13', '2487'),
 ('7808', 'Sandra', 'Hernandez', '1984-06-21', 'sandra.hernandez@york.ac.uk', '2008-05-08', '2487'),
-('7809', 'Donald', 'Hill', '1971-10-14', 'donald.hill@york.ac.uk', '1997-02-11', '2478'),
-('7810', 'Lisa', 'Scott', '1980-07-17', 'lisa.scott@york.ac.uk', '2004-05-30', '2479'),
+('7809', 'Donald', 'Hill', '1971-10-14', 'donald.hill@york.ac.uk', '2023-02-11', '2478'),
+('7810', 'Lisa', 'Scott', '1980-07-17', 'lisa.scott@york.ac.uk', '2014-05-30', '2479'),
 ('7811', 'Edward', 'Green', '1966-12-19', 'edward.green@york.ac.uk', '1993-04-03', '2480'),
-('7812', 'Barbara', 'Adams', '1974-03-08', 'barbara.adams@york.ac.uk', '1998-09-14', '2481'),
+('7812', 'Barbara', 'Adams', '1974-03-08', 'barbara.adams@york.ac.uk', '2022-09-14', '2481'),
 ('7813', 'Daniel', 'Nelson', '1977-05-26', 'daniel.nelson@york.ac.uk', '2000-07-22', '2482'),
 ('7814', 'Susan', 'Baker', '1985-11-04', 'susan.baker@york.ac.uk', '2012-02-28', '2483'),
-('7815', 'Kenneth', 'Carter', '1982-06-14', 'kenneth.carter@york.ac.uk', '2009-04-12', '2484'),
+('7815', 'Kenneth', 'Carter', '1982-06-14', 'kenneth.carter@york.ac.uk', '2015-04-12', '2484'),
 ('7816', 'Betty', 'Mitchell', '1970-09-19', 'betty.mitchell@york.ac.uk', '1996-03-16', '2485'),
 ('7817', 'Paul', 'Roberts', '1988-11-22', 'paul.roberts@york.ac.uk', '2014-08-20', '2486');
 
-SELECT COUNT(*) AS total_staff FROM staff;
+
+-- Insert department ID for staff member with missing value. 
+UPDATE staff
+SET department = '2483'
+WHERE staff_id = '7798';
+
+-- Count all staff members in each department and school.
+-- Need staff, departments, department_affiliation, and schools.
+SELECT d.department_name
+	  AS 'Department',
+	  sch.school_name
+      AS 'School',
+      COUNT(st.staff_id)
+	  AS 'N Staff'
+FROM staff st
+JOIN departments d
+	ON d.department_id = st.department
+JOIN department_affiliation dep_a
+	ON d.department_id = dep_a.department_id
+JOIN schools sch
+	ON dep_a.school_id = sch.school_id
+GROUP BY d.department_name, sch.school_name 
+ORDER BY sch.school_name, d.department_name;
+
+-- Figure out which staff are mentees and potential mentors based on years experience.
+SELECT 
+	staff_id,
+    first_name,
+    last_name,
+    d.department_name,
+    -- If years experience is less than 5, they are a mentee, otherwise, a potential mentor.
+    IF(YEAR(NOW()) - YEAR(date_joined) < 5, 'Mentee', 'Mentor') 
+    AS `Mentor Status`
+FROM 
+    staff s
+JOIN departments d
+ON d.department_id = s.department
+ORDER BY
+	d.department_name, `Mentor Status`;
+    
+-- Get email addresses of each mentor in each department to contact.
+SELECT email_address
+AS `Mentor emails`
+FROM staff
+WHERE YEAR(NOW()) - YEAR(date_joined) > 5
+ORDER BY email_address;
+
+-- Get average number of years teaching for staff in each department, ordered by number of years.
+-- Involves calculating current date using NOW()
+SELECT d.department_name
+	   AS 'Department',
+	   ROUND(AVG(YEAR(NOW()) - YEAR(s.date_joined)))
+	   AS `Avg Years Experience`
+FROM staff s
+JOIN departments d
+	ON d.department_id = s.department
+GROUP BY d.department_id
+ORDER BY `Avg Years Experience`;
 
 CREATE TABLE courses(
 	course_id CHAR(4) PRIMARY KEY,
@@ -443,14 +516,68 @@ CREATE TABLE grades(
     INDEX st_id (student_id),
     FOREIGN KEY (student_id)
 		REFERENCES students(student_id)
-        -- so module leaders can still calculate metrics if student record deleted.
-        ON DELETE SET NULL
+        ON DELETE NO ACTION -- so module leaders can still calculate metrics if student record deleted.
         ON UPDATE CASCADE,
     FOREIGN KEY (course_id) 
 		REFERENCES courses(course_id)
         -- keeps student grade even if course is deleted
-        -- updates course id 
+        -- updates course id
         ON DELETE NO ACTION
         ON UPDATE CASCADE,
     PRIMARY KEY (student_id, course_id)
 );
+
+-- Insert data into grades
+INSERT INTO grades(course_id, student_id, grade)
+VALUES
+('9111', '4240', 90),
+('9181', '4598', 55),
+('9221', '4594', 60),
+('9141', '4812', 62),
+('9161', '4981', 62),
+('9251', '4623', 70),
+('9231', '4234', 62),
+('9271', '4345', 65),
+('9201', '4267', 75),
+('9291', '4854', 72),
+('9331', '4643', 62),
+('9341', '4901', 62),
+('9321', '4378', 58),
+('9351', '4922', 58),
+('9361', '4955', 62),
+('9371', '4883', 62),
+('9381', '4477', 65),
+('9391', '4419', 65),
+('9401', '4828', 60),
+('9411', '4390', 62),
+('9421', '4735', 75),
+('9151', '4866', 80),
+('9221', '4917', 75),
+('9141', '4508', 45),
+('9161', '4661', 80),
+('9251', '4722', 60),
+('9231', '4766', 60),
+('9271', '4600', 55),
+('9201', '4789', 80),
+('9291', '4532', 70),
+('9331', '4993', 65),
+('9341', '4511', 55),
+('9321', '4512', 65);
+
+-- DELETE Philosophy FROM departments
+DELETE FROM departments
+WHERE department_name ='Philosophy'; 
+
+-- Check deletion 
+SELECT * FROM departments;
+
+-- There are now 9 departments, instead of 10 
+SELECT COUNT(department_name)
+FROM departments;
+
+-- See effect on child tables
+SELECT * FROM students
+ORDER BY first_name;
+
+SELECT * FROM department_affiliation
+ORDER BY school_id;
