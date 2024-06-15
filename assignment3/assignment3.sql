@@ -157,7 +157,7 @@ AS total_students
 FROM students;
 
 -- Return how many students are in each department
--- Use inner join to return department name
+-- Use INNER join to return department name
 -- This will ignore students with no department
 SELECT d.department_name, COUNT(student_id)
 AS department_students
@@ -173,17 +173,56 @@ VALUES
 ('4973', 'jack', 'daniels', '1995-11-23', 'jack.daniels@gmail.com');
 
 -- Return how many students are in each department
--- Use LEFT join to return department name
+-- Use LEFT (outer) join to return department name
 -- This will also count students with no department (null)
 SELECT d.department_name, COUNT(student_id)
 AS department_students
 FROM students s
 LEFT JOIN departments d 
 ON s.department = d.department_id
-GROUP BY d.department_name;
+GROUP BY d.department_name
+ORDER BY d.department_name;
 
 -- Return how many students are in each department within STEM school
+SELECT d.department_name, COUNT(student_id)
+AS department_students
+FROM students st
+JOIN departments d 
+ON st.department = d.department_id
+JOIN department_affiliation dep_a
+ON d.department_name = dep_a.department_name
+WHERE dep_a.school_name = 'STEM'
+GROUP BY d.department_name;
 
+-- Insert department IDs into student table using UPDATE
+UPDATE students
+SET department = 2478
+WHERE student_id = '4972';
+
+UPDATE students
+SET department = 2478
+WHERE student_id = '4973';
+
+-- Check addition
+SELECT * FROM students;
+
+-- Delete Philosophy from departments
+DELETE FROM departments
+WHERE department_name ='Philosophy'; 
+
+-- Check deletion 
+SELECT * FROM departments;
+
+-- There are now 9 departments, instead of 10 
+SELECT COUNT(department_name)
+FROM departments;
+
+-- See effect on child tables
+SELECT * FROM students
+ORDER BY first_name;
+
+SELECT * FROM department_affiliation
+ORDER BY department_name, school_name;
 
 CREATE TABLE staff(
 	staff_id CHAR(4) PRIMARY KEY, 
