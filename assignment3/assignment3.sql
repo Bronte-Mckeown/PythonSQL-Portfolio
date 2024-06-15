@@ -509,73 +509,18 @@ VALUES
 ('9341', '4511', '2024-08-01 23:52:59'),
 ('9321', '4512', '2024-08-01 23:52:59');
 
-CREATE TABLE grades(
-	student_id CHAR(4),
-    course_id CHAR(4),
-    grade INT,
-    INDEX st_id (student_id),
-    FOREIGN KEY (student_id)
-		REFERENCES students(student_id)
-        ON DELETE NO ACTION -- so module leaders can still calculate metrics if student record deleted.
-        ON UPDATE CASCADE,
-    FOREIGN KEY (course_id) 
-		REFERENCES courses(course_id)
-        -- keeps student grade even if course is deleted
-        -- updates course id
-        ON DELETE NO ACTION
-        ON UPDATE CASCADE,
-    PRIMARY KEY (student_id, course_id)
-);
-
--- Insert data into grades
-INSERT INTO grades(course_id, student_id, grade)
-VALUES
-('9111', '4240', 90),
-('9181', '4598', 55),
-('9221', '4594', 60),
-('9141', '4812', 62),
-('9161', '4981', 62),
-('9251', '4623', 70),
-('9231', '4234', 62),
-('9271', '4345', 65),
-('9201', '4267', 75),
-('9291', '4854', 72),
-('9331', '4643', 62),
-('9341', '4901', 62),
-('9321', '4378', 58),
-('9351', '4922', 58),
-('9361', '4955', 62),
-('9371', '4883', 62),
-('9381', '4477', 65),
-('9391', '4419', 65),
-('9401', '4828', 60),
-('9411', '4390', 62),
-('9421', '4735', 75),
-('9151', '4866', 80),
-('9221', '4917', 75),
-('9141', '4508', 45),
-('9161', '4661', 80),
-('9251', '4722', 60),
-('9231', '4766', 60),
-('9271', '4600', 55),
-('9201', '4789', 80),
-('9291', '4532', 70),
-('9331', '4993', 65),
-('9341', '4511', 55),
-('9321', '4512', 65);
-
--- DELETE Philosophy FROM departments
+-- DELETE Philosophy FROM departments table.
 DELETE FROM departments
 WHERE department_name ='Philosophy'; 
 
--- Check deletion 
+-- Check deletion.
 SELECT * FROM departments;
 
--- There are now 9 departments, instead of 10 
+-- There are now 9 departments, instead of 10.
 SELECT COUNT(department_name)
 FROM departments;
 
--- See effect on child tables
+-- See effect on child tables.
 SELECT * FROM students
 ORDER BY first_name;
 
