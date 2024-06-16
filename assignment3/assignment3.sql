@@ -1,11 +1,10 @@
 -- This assignment creates a university database.
--- It shows how it would be used to (1) enrol students
--- into the university, (2) keep staff records and identify
--- staff members that can be mentors and need mentoring and
--- (3) enrol students into courses, stopping them doing it after
--- the deadline and once the course is full.
+-- It shows how it would be used by university admin for a range
+-- of tasks including: enrolling students to the university and specific courses,
+-- retrieving student numbers in departments and courses, keeping staff records,
+-- and contacting staff via email to be mentors of junior staff members.
 
--- Create database. 
+-- Create university database. 
 CREATE DATABASE university;
 
 -- Use database.
@@ -35,26 +34,24 @@ VALUES
 ('2486', 'Economics'),
 ('2487', 'Philosophy');
 
--- Select all to look at insertion.
+-- Select all to see all departments (IDs and names) in university, ordered by name.
 SELECT * 
 FROM departments
 ORDER BY department_name;
 
--- Return all department names.
+-- Select just department_name to only see department names, ordered by name.
 SELECT department_name
 AS 'Department'
 FROM departments
 ORDER BY department_name;
 
--- Return all department names that begin with P
--- and store in view. 
+-- Return all department names that begin with P.
 SELECT department_name
-AS 'Department'
 FROM departments
 WHERE department_name LIKE 'P%'
 ORDER BY department_name;
 
--- Count how many departments there are in table.
+-- Count how many departments there are in the university.
 SELECT COUNT(department_id) 
 AS 'Total Departments'
 FROM departments;
@@ -95,8 +92,6 @@ CREATE TABLE department_affiliation(
 	PRIMARY KEY (department_id, school_id)
 );
 
--- DROP TABLE department_affiliation;
-
 -- Insert IDs into department_affiliation table. 
 INSERT INTO department_affiliation(department_id, school_id)
 VALUES
@@ -133,8 +128,6 @@ CREATE TABLE students(
         ON DELETE SET NULL
         ON UPDATE CASCADE
 );
-
--- DROP TABLE students;
 
 --  Insert students into table.
 -- Note: For time saving, gave CHAT-GPT the first three rows and asked it to generate 30 more.
@@ -175,12 +168,12 @@ VALUES
 ('4511', 'scarlett', 'young', '2001-01-05', 'scarlett.young@gmail.com', '2479'),
 ('4512', 'elliot', 'young', '2001-01-05', 'elliot.young@gmail.com', '2480');
 
--- Count how many students there are overall.
+-- Count how many students there are overall in university.
 SELECT COUNT(student_id) 
 AS 'Total Students'
 FROM students;
 
--- Add two students with no department affiliation.
+-- Add two students with no department affiliation as they haven't decided yet.
 INSERT INTO students(student_id, first_name, last_name, dob, email_address)
 VALUES
 ('4972', 'lucy', 'walmes', '1992-12-01', 'lucy.walmes@gmail.com'),
@@ -202,6 +195,11 @@ AS
 	GROUP BY d.department_name
 	ORDER BY d.department_name;
 
+-- Select specific departments from view 
+SELECT * 
+FROM n_students_by_department
+WHERE Department in ('Biology', 'Chemistry', 'Physics');
+
 -- Count how many students are in each department.
 -- But this time, use LEFT (outer) join to return department name.
 -- This will also count students with no department (null).
@@ -216,7 +214,12 @@ AS
 	ON s.department = d.department_id
 	GROUP BY d.department_name
 	ORDER BY d.department_name;
-
+    
+-- Select number of students that don't have a department
+SELECT *
+FROM n_students_by_department_with_null
+WHERE Department IS NULL;
+    
 -- Return how many students are in each department within STEM school.
 SELECT d.department_name
 	AS 'Department',
@@ -230,7 +233,7 @@ ON d.department_id = dep_a.department_id
 WHERE dep_a.school_id = '6000'
 GROUP BY d.department_name;
 
--- Insert department IDs into student table using UPDATE
+-- Insert department IDs for those 2 students into student table using UPDATE
 UPDATE students
 SET department = 2478
 WHERE student_id = '4972';
@@ -243,6 +246,12 @@ WHERE student_id = '4973';
 SELECT department
 FROM students
 WHERE student_id IN ('4972', '4973');
+
+-- Select number of students that don't have a department
+-- This will now be no students!
+SELECT *
+FROM n_students_by_department_with_null
+WHERE Department IS NULL;
 
 -- Create 'staff' table with staff IDs (primary key), first and last names,
 -- DOB, email address, date staff member joined, and their department. 
@@ -266,8 +275,6 @@ CREATE TABLE staff(
 	CHECK (staff_id LIKE '7%')
 );
 
--- DROP TABLE staff;
-
 -- Insert data into staff table.
 -- Again, gave CHAT-GPT the first 2 rows and asked for 27 more to have more data to play with.
 INSERT INTO staff(staff_id, first_name, last_name, dob, email_address, date_joined, department)
@@ -281,7 +288,7 @@ VALUES
 ('7795', 'David', 'Lee', '1975-10-09', 'david.lee@york.ac.uk', '2023-05-22', '2481'),
 ('7796', 'Laura', 'White', '1981-03-23', 'laura.white@york.ac.uk', '2006-11-17', '2481'),
 ('7797', 'James', 'Martin', '1969-09-07', 'james.martin@york.ac.uk', '1995-02-10', '2482'),
-('7798', 'Karen', 'Anderson', '1974-05-29', 'karen.anderson@york.ac.uk', '1999-08-05', null),
+('7798', 'Karen', 'Anderson', '1974-05-29', 'karen.anderson@york.ac.uk', '1999-08-05', NULL),
 ('7799', 'Robert', 'Garcia', '1986-02-19', 'robert.garcia@york.ac.uk', '2010-04-12', '2483'),
 ('7800', 'Patricia', 'Martinez', '1982-11-30', 'patricia.martinez@york.ac.uk', '2009-06-28', '2483'),
 ('7801', 'Charles', 'Clark', '1970-07-16', 'charles.clark@york.ac.uk', '1996-01-18', '2484'),
@@ -308,7 +315,7 @@ SET department = '2483'
 WHERE staff_id = '7798';
 
 -- Count all staff members in each department and school.
--- Need staff, departments, department_affiliation, and schools.
+-- Need staff, departments, department_affiliation, and schools tables.
 CREATE VIEW n_staff_by_department_school
 AS
 	SELECT d.department_name
@@ -330,14 +337,18 @@ AS
 -- Look at view. 
 SELECT * 
 FROM n_staff_by_department_school;
+
+-- Use view to only select departments within Social Science.
+SELECT *
+FROM n_staff_by_department_school
+WHERE School = 'Social Science';
     
 -- Use view to now calculate total staff within each school.
 SELECT School,
 	SUM(`N Staff`)
 	AS 'Total'
     FROM n_staff_by_department_school
-    GROUP BY School
-;
+    GROUP BY School;
 
 -- Figure out which staff are mentees and potential mentors based on years experience.
 CREATE VIEW mentor_mentees
@@ -358,14 +369,14 @@ AS
 	ORDER BY
 		d.department_name, `Mentor Status`;
 
+-- Look at all data in view. 
 SELECT *
 FROM mentor_mentees;
     
 -- Get email addresses of each mentor in each department to contact.
-SELECT email_address
+SELECT email_address, department_name
 FROM mentor_mentees
-WHERE `Mentor Status` = 'Mentor'
-;
+WHERE `Mentor Status` = 'Mentor';
 
 -- Get average number of years teaching for staff in each department, ordered by number of years.
 -- Involves calculating current date using NOW()
@@ -379,6 +390,11 @@ JOIN departments d
 GROUP BY d.department_id
 ORDER BY `Avg Years Experience`;
 
+-- Create a 'courses' table.
+-- Course ID is the primary key (must start with 9 and be 4 characters long)
+-- Course name must be unique and not null.  
+-- Capacity indicates max capacity of course (default = 5)
+-- Enrol deadline indicates deadline for enrolment (default = 1st Aug 2024) 
 CREATE TABLE courses(
 	course_id CHAR(4) PRIMARY KEY,
     course_name VARCHAR(200) UNIQUE NOT NULL,
@@ -387,8 +403,7 @@ CREATE TABLE courses(
     CHECK (course_id LIKE '9%')
 );
 
--- DROP TABLE courses; 
-
+-- Insert data values into courses table (used CHAT-GPT again to generate more data (gave first two rows). 
 INSERT INTO courses(course_id, course_name, capacity, enrol_deadline)
 VALUES
 ('9111', 'Introduction to Cognitive Neuroscience', 5, '2024-08-01 23:59:59'),
@@ -423,11 +438,15 @@ VALUES
 ('9411', 'Digital Media and Society', 2, '2024-07-01 23:59:59'),
 ('9421', 'Neuropsychology', 5, '2024-08-01 23:59:59');
 
--- Update course enrolment deadline for Neuropsychology course 
+-- Update course enrolment deadline for Neuropsychology course.
 UPDATE courses
 SET enrol_deadline = '2023-06-16 20:00:00'
 WHERE course_name = 'Neuropsychology';
 
+-- Create a course details table.
+-- Primary key is course_id which is a foreign key, linked to courses.
+-- Other fields include module leader (foreign key = staff id from staff table)
+-- and department (foreign key = department id from department table).    
 CREATE TABLE course_details(
 	course_id CHAR(4),
 	module_leader CHAR(4),
@@ -450,7 +469,7 @@ CREATE TABLE course_details(
 	PRIMARY KEY (course_id) 
 );
 
--- Asked Chat GPT to fill in course details based on data in other tables above
+-- Asked Chat GPT to fill in course details based on data in other tables above.
 INSERT INTO course_details(course_id, module_leader, department)
 VALUES
 ('9111', '7789', '2478'),
@@ -485,14 +504,14 @@ VALUES
 ('9411', '7816', '2485'),
 ('9421', '7817', '2486');
 
--- Student enrolment
--- Trigger: Can't add row if after enrolment deadline
--- Trigger: Can’t add row if course is full
-
+-- Create a Student enrolment table.
+-- Course ID and student ID are composite primary keys (both foreign keys).
+-- Will have 2 triggers to prevent student records being added that shouldn't be.
+-- Trigger 1: Can't add row if time being added is after enrolment deadline.
+-- Trigger 2: Can’t add row if course is full (past capacity).
 CREATE TABLE enrolment(
 	course_id CHAR(4),
     student_id CHAR(4),
-    date_enrolled DATETIME,
     INDEX crs_id (course_id),
     FOREIGN KEY (course_id) 
 		REFERENCES courses(course_id)
@@ -506,70 +525,70 @@ CREATE TABLE enrolment(
     PRIMARY KEY (course_id, student_id )
 );
 
--- Asked CHAT-GPT to enrol each student in a course within their department, starting with example insert
-INSERT INTO enrolment(course_id, student_id, date_enrolled)
+-- Asked CHAT-GPT to enrol each student in a course within their department, starting with example insert.
+INSERT INTO enrolment(course_id, student_id)
 VALUES
-('9111', '4240', '2024-08-01 23:52:59'),
-('9181', '4598', '2024-08-01 23:52:59'),
-('9221', '4594', '2024-08-01 23:52:59'),
-('9141', '4812', '2024-08-01 23:52:59'),
-('9161', '4981', '2024-08-01 23:52:59'),
-('9251', '4623', '2024-08-01 23:52:59'),
-('9231', '4234', '2024-08-01 23:52:59'),
-('9271', '4345', '2024-08-01 23:52:59'),
-('9201', '4267', '2024-08-01 23:52:59'),
-('9291', '4854', '2024-08-01 23:52:59'),
-('9331', '4643', '2024-08-01 23:52:59'),
-('9341', '4901', '2024-08-01 23:52:59'),
-('9321', '4378', '2024-08-01 23:52:59'),
-('9351', '4922', '2024-08-01 23:52:59'),
-('9361', '4955', '2024-08-01 23:52:59'),
-('9371', '4883', '2024-08-01 23:52:59'),
-('9381', '4477', '2024-08-01 23:52:59'),
-('9391', '4419', '2024-08-01 23:52:59'),
-('9401', '4828', '2024-08-01 23:52:59'),
-('9411', '4390', '2024-08-01 23:52:59'),
-('9421', '4735', '2024-08-01 23:52:59'),
-('9151', '4866', '2024-08-01 23:52:59'),
-('9221', '4917', '2024-08-01 23:52:59'),
-('9141', '4508', '2024-08-01 23:52:59'),
-('9161', '4661', '2024-08-01 23:52:59'),
-('9251', '4722', '2024-08-01 23:52:59'),
-('9231', '4766', '2024-08-01 23:52:59'),
-('9271', '4600', '2024-08-01 23:52:59'),
-('9201', '4789', '2024-08-01 23:52:59'),
-('9291', '4532', '2024-08-01 23:52:59'),
-('9331', '4993', '2024-08-01 23:52:59'),
-('9341', '4511', '2024-08-01 23:52:59'),
-('9321', '4512', '2024-08-01 23:52:59');
+('9111', '4240'),
+('9181', '4598'),
+('9221', '4594'),
+('9141', '4812'),
+('9161', '4981'),
+('9251', '4623'),
+('9231', '4234'),
+('9271', '4345'),
+('9201', '4267'),
+('9291', '4854'),
+('9331', '4643'),
+('9341', '4901'),
+('9321', '4378'),
+('9351', '4922'),
+('9361', '4955'),
+('9371', '4883'),
+('9381', '4477'),
+('9391', '4419'),
+('9401', '4828'),
+('9411', '4390'),
+('9421', '4735'),
+('9151', '4866'),
+('9221', '4917'),
+('9141', '4508'),
+('9161', '4661'),
+('9251', '4722'),
+('9231', '4766'),
+('9271', '4600'),
+('9201', '4789'),
+('9291', '4532'),
+('9331', '4993'),
+('9341', '4511'),
+('9321', '4512');
 
 -- Trigger to stop rows being added to enrolment when course is full. 
--- Change delimiter so that code doesn't stop prematurely in block. 
+-- First change delimiter so that code doesn't stop prematurely in block. 
 DELIMITER $$ 
 
-CREATE TRIGGER check_capacity
 -- Use 'Before Insert' so that this happens BEFORE row insert happens in enrolment table
-BEFORE INSERT ON enrolment FOR EACH ROW
+CREATE TRIGGER check_capacity BEFORE INSERT ON enrolment 
+FOR EACH ROW
 BEGIN
-	-- Declare variables to add to using queries below. 
+	-- Declare variables to add to using queries below.
     DECLARE current_count INT;
     DECLARE capacity_count INT;
 
-    -- Get the current count of the course
+    -- Get the current count of the course (add to variable)
     SELECT COUNT(*) INTO current_count
     FROM enrolment
     WHERE course_id = NEW.course_id;
 
-    -- Get the capacity of the course from the courses table
+    -- Get the capacity of the course from the courses table (add to variable)
     SELECT capacity INTO capacity_count
     FROM courses
     WHERE course_id = NEW.course_id;
 
     -- Check if the current_count is greater than or equal to capicity
     IF current_count >= capacity_count THEN
-    -- If it does, throw error using SQLSTATE '4500' (which is generate value for user-defined exception)
+    -- If it is, throw error using SQLSTATE '4500' (which is generate value for user-defined exception)
         SIGNAL SQLSTATE '45000' 
-	-- Set message to display to user. 
+	-- Set message to display to user to explain error.
         SET MESSAGE_TEXT = 'Course capacity reached. Cannot add student record.';
     END IF;
 END$$
@@ -580,9 +599,9 @@ DELIMITER ;
 -- Change delimiter so that code doesn't stop prematurely in block.
 DELIMITER $$ 
 
-CREATE TRIGGER check_deadline
 -- Use 'Before Insert' so that this happens BEFORE row insert happens in enrolment table
-BEFORE INSERT ON enrolment FOR EACH ROW
+CREATE TRIGGER check_deadline BEFORE INSERT ON enrolment
+FOR EACH ROW
 BEGIN
 	-- Declare variables to add to using queries below. 
     DECLARE deadline DATETIME;
@@ -611,39 +630,43 @@ VALUES
 ('4302', 'meliaa', 'smith', '1997-03-03', 'meliaa.smith@gmail.com', '2478');
 
 -- Try to add student to course that is already at capacity.
-INSERT INTO enrolment(course_id, student_id, date_enrolled)
+INSERT INTO enrolment(course_id, student_id)
 VALUES
-('9141', '4300', NOW());
+('9141', '4300');
 
 -- Add student to course that isn't at capaciy.
-INSERT INTO enrolment(course_id, student_id, date_enrolled)
+INSERT INTO enrolment(course_id, student_id)
 VALUES
-('9111', '4301', NOW());
+('9111', '4301');
 
 -- Add student to course where deadline has passed.
-INSERT INTO enrolment(course_id, student_id, date_enrolled)
+INSERT INTO enrolment(course_id, student_id)
 VALUES
-('9421', '4301', NOW());
+('9421', '4301');
 
 -- Add student to course where deadline hasn't passed.
-INSERT INTO enrolment(course_id, student_id, date_enrolled)
+INSERT INTO enrolment(course_id, student_id)
 VALUES
-('9361', '4301', NOW());
+('9361', '4301');
 
+-- Last task: Philosophy department has shut down, update records.
 -- DELETE Philosophy FROM departments table
 DELETE FROM departments
-WHERE department_name ='Philosophy'; 
+WHERE department_name ='Philosophy';
 
 -- Check deletion.
-SELECT * FROM departments;
+SELECT * 
+FROM departments;
 
 -- There are now 9 departments, instead of 10.
 SELECT COUNT(department_name)
 FROM departments;
 
--- See effect on child tables.
-SELECT * FROM students
+-- Check effect on child tables.
+SELECT * 
+FROM students
 ORDER BY first_name;
 
-SELECT * FROM department_affiliation
+SELECT * 
+FROM department_affiliation
 ORDER BY school_id;
