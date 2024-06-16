@@ -41,7 +41,8 @@ AS 'Department'
 FROM departments
 ORDER BY department_name;
 
--- Return all department names that begin with P.
+-- Return all department names that begin with P
+-- and store in view. 
 SELECT department_name
 AS 'Department'
 FROM departments
@@ -183,28 +184,33 @@ VALUES
 -- Count how many students are in each department.
 -- Use INNER join to return department name.
 -- This will ignore students with no department.
-SELECT d.department_name
-		AS 'Department',
-		COUNT(student_id)
-		AS 'N Students'
-FROM students s
-INNER JOIN departments d 
-ON s.department = d.department_id
-GROUP BY d.department_name
-ORDER BY d.department_name;
+-- Store in a view to use later.
+CREATE VIEW n_students_by_department
+AS
+	SELECT d.department_name
+			AS 'Department',
+			COUNT(student_id)
+			AS 'N Students'
+	FROM students s
+	INNER JOIN departments d 
+	ON s.department = d.department_id
+	GROUP BY d.department_name
+	ORDER BY d.department_name;
 
 -- Count how many students are in each department.
 -- But this time, use LEFT (outer) join to return department name.
 -- This will also count students with no department (null).
-SELECT d.department_name
-		AS 'Department',
-		COUNT(student_id)
-		AS 'N Students'
-FROM students s
-LEFT JOIN departments d 
-ON s.department = d.department_id
-GROUP BY d.department_name
-ORDER BY d.department_name;
+CREATE VIEW n_students_by_department_with_null
+AS
+	SELECT d.department_name
+			AS 'Department',
+			COUNT(student_id)
+			AS 'N Students'
+	FROM students s
+	LEFT JOIN departments d 
+	ON s.department = d.department_id
+	GROUP BY d.department_name
+	ORDER BY d.department_name;
 
 -- Return how many students are in each department within STEM school.
 SELECT d.department_name
@@ -291,7 +297,6 @@ VALUES
 ('7816', 'Betty', 'Mitchell', '1970-09-19', 'betty.mitchell@york.ac.uk', '1996-03-16', '2485'),
 ('7817', 'Paul', 'Roberts', '1988-11-22', 'paul.roberts@york.ac.uk', '2014-08-20', '2486');
 
-
 -- Insert department ID for staff member with missing value. 
 UPDATE staff
 SET department = '2483'
@@ -299,44 +304,63 @@ WHERE staff_id = '7798';
 
 -- Count all staff members in each department and school.
 -- Need staff, departments, department_affiliation, and schools.
-SELECT d.department_name
-	  AS 'Department',
-	  sch.school_name
-      AS 'School',
-      COUNT(st.staff_id)
-	  AS 'N Staff'
-FROM staff st
-JOIN departments d
-	ON d.department_id = st.department
-JOIN department_affiliation dep_a
-	ON d.department_id = dep_a.department_id
-JOIN schools sch
-	ON dep_a.school_id = sch.school_id
-GROUP BY d.department_name, sch.school_name 
-ORDER BY sch.school_name, d.department_name;
+CREATE VIEW n_staff_by_department_school
+AS
+	SELECT d.department_name
+		  AS 'Department',
+		  sch.school_name
+		  AS 'School',
+		  COUNT(st.staff_id)
+		  AS 'N Staff'
+	FROM staff st
+	JOIN departments d
+		ON d.department_id = st.department
+	JOIN department_affiliation dep_a
+		ON d.department_id = dep_a.department_id
+	JOIN schools sch
+		ON dep_a.school_id = sch.school_id
+	GROUP BY d.department_name, sch.school_name 
+	ORDER BY sch.school_name, d.department_name;
+
+-- Look at view. 
+SELECT * 
+FROM n_staff_by_department_school;
+    
+-- Use view to now calculate total staff within each school.
+SELECT School,
+	SUM(`N Staff`)
+	AS 'Total'
+    FROM n_staff_by_department_school
+    GROUP BY School
+;
 
 -- Figure out which staff are mentees and potential mentors based on years experience.
-SELECT 
-	staff_id,
-    first_name,
-    last_name,
-    d.department_name,
-    -- If years experience is less than 5, they are a mentee, otherwise, a potential mentor.
-    IF(YEAR(NOW()) - YEAR(date_joined) < 5, 'Mentee', 'Mentor') 
-    AS `Mentor Status`
-FROM 
-    staff s
-JOIN departments d
-ON d.department_id = s.department
-ORDER BY
-	d.department_name, `Mentor Status`;
+CREATE VIEW mentor_mentees
+AS
+	SELECT 
+		s.staff_id,
+		s.first_name,
+		s.last_name,
+        s.email_address,
+		d.department_name,
+		-- If years experience is less than 5, they are a mentee, otherwise, a potential mentor.
+		IF(YEAR(NOW()) - YEAR(date_joined) < 5, 'Mentee', 'Mentor') 
+		AS `Mentor Status`
+	FROM 
+		staff s
+	JOIN departments d
+	ON d.department_id = s.department
+	ORDER BY
+		d.department_name, `Mentor Status`;
+
+SELECT *
+FROM mentor_mentees;
     
 -- Get email addresses of each mentor in each department to contact.
 SELECT email_address
-AS `Mentor emails`
-FROM staff
-WHERE YEAR(NOW()) - YEAR(date_joined) > 5
-ORDER BY email_address;
+FROM mentor_mentees
+WHERE `Mentor Status` = 'Mentor'
+;
 
 -- Get average number of years teaching for staff in each department, ordered by number of years.
 -- Involves calculating current date using NOW()
