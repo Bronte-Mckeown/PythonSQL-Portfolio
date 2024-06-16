@@ -423,6 +423,11 @@ VALUES
 ('9411', 'Digital Media and Society', 2, '2024-07-01 23:59:59'),
 ('9421', 'Neuropsychology', 5, '2024-08-01 23:59:59');
 
+-- Update course enrolment deadline for Neuropsychology course 
+UPDATE courses
+SET enrol_deadline = '2023-06-16 20:00:00'
+WHERE course_name = 'Neuropsychology';
+
 CREATE TABLE course_details(
 	course_id CHAR(4),
 	module_leader CHAR(4),
@@ -571,6 +576,33 @@ END$$
 -- Change delimiter back to normal. 
 DELIMITER ;
 
+-- Trigger to stop rows being added to enrolment when enrolment deadline has passed.
+-- Change delimiter so that code doesn't stop prematurely in block.
+DELIMITER $$ 
+
+CREATE TRIGGER check_deadline
+-- Use 'Before Insert' so that this happens BEFORE row insert happens in enrolment table
+BEFORE INSERT ON enrolment FOR EACH ROW
+BEGIN
+	-- Declare variables to add to using queries below. 
+    DECLARE deadline DATETIME;
+
+    -- Get the capacity of the course from the courses table
+    SELECT enrol_deadline INTO deadline
+    FROM courses
+    WHERE course_id = NEW.course_id;
+
+    -- Check if the current time is after deadline
+    IF  NOW() > deadline THEN
+    -- If it does, throw error using SQLSTATE '4500' (which is generate value for user-defined exception)
+        SIGNAL SQLSTATE '45000' 
+	-- Set message to display to user. 
+        SET MESSAGE_TEXT = 'Course enrolment deadline passed. Cannot add student record.';
+    END IF;
+END$$
+-- Change delimiter back to normal. 
+DELIMITER ;
+
 -- Add more students into students table.
 INSERT INTO students(student_id, first_name, last_name, dob, email_address, department)
 VALUES
@@ -587,6 +619,16 @@ VALUES
 INSERT INTO enrolment(course_id, student_id, date_enrolled)
 VALUES
 ('9111', '4301', NOW());
+
+-- Add student to course where deadline has passed.
+INSERT INTO enrolment(course_id, student_id, date_enrolled)
+VALUES
+('9421', '4301', NOW());
+
+-- Add student to course where deadline hasn't passed.
+INSERT INTO enrolment(course_id, student_id, date_enrolled)
+VALUES
+('9361', '4301', NOW());
 
 -- DELETE Philosophy FROM departments table
 DELETE FROM departments
