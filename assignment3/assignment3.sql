@@ -1,4 +1,9 @@
 -- This assignment creates a university database.
+-- It shows how it would be used to (1) enrol students
+-- into the university, (2) keep staff records and identify
+-- staff members that can be mentors and need mentoring and
+-- (3) enrol students into courses, stopping them doing it after
+-- the deadline and once the course is full.
 
 -- Create database. 
 CREATE DATABASE university;
@@ -386,37 +391,37 @@ CREATE TABLE courses(
 
 INSERT INTO courses(course_id, course_name, capacity, enrol_deadline)
 VALUES
-('9111', 'Introduction to Cognitive Neuroscience', 10, '2024-08-01 23:59:59'),
+('9111', 'Introduction to Cognitive Neuroscience', 5, '2024-08-01 23:59:59'),
 ('9151', 'Introduction to Research Methods', 5, '2024-08-01 23:59:59'),
-('9221', 'BioTech Applications', 10, '2024-08-01 23:59:59'),
-('9131', 'Advanced Data Analysis', 15, '2024-08-01 23:59:59'),
-('9141', 'Genetics and Genomics', 12, '2024-08-01 23:59:59'),
-('9161', 'Machine Learning', 20, '2024-08-01 23:59:59'),
-('9171', 'Artificial Intelligence', 20, '2024-08-01 23:59:59'),
-('9181', 'Ethics in Technology', 8, '2024-08-01 23:59:59'),
-('9191', 'Introduction to Philosophy', 15, '2024-08-01 23:59:59'),
-('9201', 'Modern Political Theory', 10, '2024-08-01 23:59:59'),
-('9211', 'Economic Principles', 25, '2024-08-01 23:59:59'),
-('9231', 'History of Modern Art', 12, '2024-08-01 23:59:59'),
-('9241', 'Environmental Science', 18, '2024-08-01 23:59:59'),
-('9251', 'Organic Chemistry', 20, '2024-08-01 23:59:59'),
-('9261', 'Quantum Physics', 15, '2024-08-01 23:59:59'),
-('9271', 'English Literature through history', 30, '2024-08-01 23:59:59'),
-('9281', 'Introduction to Sociology', 25, '2024-08-01 23:59:59'),
-('9291', 'Cultural Anthropology', 10, '2024-08-01 23:59:59'),
-('9301', 'International Relations', 20, '2024-08-01 23:59:59'),
-('9311', 'Fundamentals of Marketing', 22, '2024-08-01 23:59:59'),
-('9321', 'Business Management', 25, '2024-08-01 23:59:59'),
-('9331', 'Introduction to Psychology', 30, '2024-08-01 23:59:59'),
-('9341', 'Educational Psychology', 18, '2024-08-01 23:59:59'),
-('9351', 'Developmental Biology', 15, '2024-08-01 23:59:59'),
-('9361', 'Public Health', 20, '2024-08-01 23:59:59'),
-('9371', 'Human Anatomy', 25, '2024-08-01 23:59:59'),
-('9381', 'History of Ancient Civilizations', 12, '2024-07-01 23:59:59'),
-('9391', 'Creative Writing', 10, '2024-07-01 23:59:59'),
-('9401', 'Introduction to Robotics', 15, '2024-07-01 23:59:59'),
-('9411', 'Digital Media and Society', 20, '2024-07-01 23:59:59'),
-('9421', 'Neuropsychology', 8, '2024-08-01 23:59:59');
+('9221', 'BioTech Applications', 3, '2024-08-01 23:59:59'),
+('9131', 'Advanced Data Analysis', 2, '2024-08-01 23:59:59'),
+('9141', 'Genetics and Genomics', 1, '2024-08-01 23:59:59'),
+('9161', 'Machine Learning', 2, '2024-08-01 23:59:59'),
+('9171', 'Artificial Intelligence', 2, '2024-08-01 23:59:59'),
+('9181', 'Ethics in Technology', 5, '2024-08-01 23:59:59'),
+('9191', 'Introduction to Philosophy', 5, '2024-08-01 23:59:59'),
+('9201', 'Modern Political Theory', 2, '2024-08-01 23:59:59'),
+('9211', 'Economic Principles', 3, '2024-08-01 23:59:59'),
+('9231', 'History of Modern Art', 2, '2024-08-01 23:59:59'),
+('9241', 'Environmental Science', 8, '2024-08-01 23:59:59'),
+('9251', 'Organic Chemistry', 1, '2024-08-01 23:59:59'),
+('9261', 'Quantum Physics', 2, '2024-08-01 23:59:59'),
+('9271', 'English Literature through history', 3, '2024-08-01 23:59:59'),
+('9281', 'Introduction to Sociology', 2, '2024-08-01 23:59:59'),
+('9291', 'Cultural Anthropology', 2, '2024-08-01 23:59:59'),
+('9301', 'International Relations', 2, '2024-08-01 23:59:59'),
+('9311', 'Fundamentals of Marketing', 2, '2024-08-01 23:59:59'),
+('9321', 'Business Management', 5, '2024-08-01 23:59:59'),
+('9331', 'Introduction to Psychology', 3, '2024-08-01 23:59:59'),
+('9341', 'Educational Psychology', 1, '2024-08-01 23:59:59'),
+('9351', 'Developmental Biology', 5, '2024-08-01 23:59:59'),
+('9361', 'Public Health', 2, '2024-08-01 23:59:59'),
+('9371', 'Human Anatomy', 5, '2024-08-01 23:59:59'),
+('9381', 'History of Ancient Civilizations', 2, '2024-07-01 23:59:59'),
+('9391', 'Creative Writing', 1, '2024-07-01 23:59:59'),
+('9401', 'Introduction to Robotics', 5, '2024-07-01 23:59:59'),
+('9411', 'Digital Media and Society', 2, '2024-07-01 23:59:59'),
+('9421', 'Neuropsychology', 5, '2024-08-01 23:59:59');
 
 CREATE TABLE course_details(
 	course_id CHAR(4),
@@ -533,7 +538,57 @@ VALUES
 ('9341', '4511', '2024-08-01 23:52:59'),
 ('9321', '4512', '2024-08-01 23:52:59');
 
--- DELETE Philosophy FROM departments table.
+-- Trigger to stop rows being added to enrolment when course is full. 
+-- Change delimiter so that code doesn't stop prematurely in block. 
+DELIMITER $$ 
+
+CREATE TRIGGER check_capacity
+-- Use 'Before Insert' so that this happens BEFORE row insert happens in enrolment table
+BEFORE INSERT ON enrolment FOR EACH ROW
+BEGIN
+	-- Declare variables to add to using queries below. 
+    DECLARE current_count INT;
+    DECLARE capacity_count INT;
+
+    -- Get the current count of the course
+    SELECT COUNT(*) INTO current_count
+    FROM enrolment
+    WHERE course_id = NEW.course_id;
+
+    -- Get the capacity of the course from the courses table
+    SELECT capacity INTO capacity_count
+    FROM courses
+    WHERE course_id = NEW.course_id;
+
+    -- Check if the current_count is greater than or equal to capicity
+    IF current_count >= capacity_count THEN
+    -- If it does, throw error using SQLSTATE '4500' (which is generate value for user-defined exception)
+        SIGNAL SQLSTATE '45000' 
+	-- Set message to display to user. 
+        SET MESSAGE_TEXT = 'Course capacity reached. Cannot add student record.';
+    END IF;
+END$$
+-- Change delimiter back to normal. 
+DELIMITER ;
+
+-- Add more students into students table.
+INSERT INTO students(student_id, first_name, last_name, dob, email_address, department)
+VALUES
+('4300', 'bronty', 'mckeowne', '1997-12-03', 'bronty.mckeowne@gmail.com', '2478'),
+('4301', 'bron', 'delali', '1997-11-03', 'bron.delali@gmail.com', '2478'),
+('4302', 'meliaa', 'smith', '1997-03-03', 'meliaa.smith@gmail.com', '2478');
+
+-- Try to add student to course that is already at capacity.
+INSERT INTO enrolment(course_id, student_id, date_enrolled)
+VALUES
+('9141', '4300', NOW());
+
+-- Add student to course that isn't at capaciy.
+INSERT INTO enrolment(course_id, student_id, date_enrolled)
+VALUES
+('9111', '4301', NOW());
+
+-- DELETE Philosophy FROM departments table
 DELETE FROM departments
 WHERE department_name ='Philosophy'; 
 
