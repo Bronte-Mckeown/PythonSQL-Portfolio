@@ -6,3 +6,5 @@ assignment2/api_key.txt
 *.csv
 *.docx
 assignment2/~$structions.docx
+*doc
+*assignment3/instructions.docx
