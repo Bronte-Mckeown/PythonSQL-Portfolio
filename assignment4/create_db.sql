@@ -40,9 +40,9 @@ BEGIN
 END$$
 DELIMITER ;
 
-CALL `nails`.`filldates`(20240629, 20240930, 'Bronte');
-CALL `nails`.`filldates`(20240629, 20240930, 'Finn');
-CALL `nails`.`filldates`(20240629, 20240930, 'Max');
+CALL `nails`.`filldates`(20240629, 20240930, 'bronte');
+CALL `nails`.`filldates`(20240629, 20240930, 'finn');
+CALL `nails`.`filldates`(20240629, 20240930, 'max');
 
 SELECT * FROM nail_bookings;
 
