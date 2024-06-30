@@ -1,10 +1,19 @@
 from datetime import datetime, timedelta
 import string
 import requests
+import json
+from db_utils import BookingNotFoundError
 
 def get_availability_by_date(date):
     result = requests.get(
-        'http://127.0.0.1:8000/availability/{}'.format(date),
+        'http://127.0.0.1:8000/date_availability/{}'.format(date),
+        headers={'content-type': 'application/json'}
+    )
+    return result.json()
+
+def get_availability_by_nailTech(nailTech):
+    result = requests.get(
+        'http://127.0.0.1:8000/tech_availability/{}'.format(nailTech),
         headers={'content-type': 'application/json'}
     )
     return result.json()
@@ -23,10 +32,30 @@ def add_new_booking(date, nailTech, appointmentType, time, client, contact):
     result = requests.put(
         'http://127.0.0.1:8000/booking',
         headers={'content-type': 'application/json'},
-        data=json.dumps(booking)
+        data= json.dumps(booking)
     )
 
     return result.json()
+
+def delete_old_booking(date, time, contact):
+
+    booking = {
+         "_date": date,
+         "time": time,
+         "contact": contact
+    }
+
+    # try:
+    result = requests.put(
+        'http://127.0.0.1:8000/delete',
+        headers={'content-type': 'application/json'},
+        data= json.dumps(booking)
+    )
+
+    return result.json()
+
+    # except BookingNotFoundError as e:
+    #     raise BookingNotFoundError("There are no bookings matching those details. Please check that the date, time, and your number are correct.")
 
 def display_availability(records):
     # Print the names of the columns.
@@ -38,6 +67,18 @@ def display_availability(records):
     for item in records:
         print("{:<15} {:<15} {:<15} {:<15} {:<15} {:<15} {:<15} ".format(
             item['Nail Stylist'], item['12-13'], item['13-14'], item['14-15'], item['15-16'], item['16-17'], item['17-18']
+        ))
+
+def display_tech_availability(records):
+    # Print the names of the columns.
+    print("{:<15} {:<15} {:<15} {:<15} {:<15} {:<15} {:<15} ".format(
+        'Date', '12-13', '13-14', '14-15', '15-16', '16-17', '17-18'))
+    print('-' * 105)
+
+    # print each data item.
+    for item in records:
+        print("{:<15} {:<15} {:<15} {:<15} {:<15} {:<15} {:<15} ".format(
+            item['Date'], item['12-13'], item['13-14'], item['14-15'], item['15-16'], item['16-17'], item['17-18']
         ))
 
 def get_valid_date():
@@ -58,8 +99,12 @@ def get_valid_date():
             if date_obj.date() < today.date():
                 # If it is, tell client to try again.
                 print ("You cannot book an appointment in the past! Please try again.")
+
+            elif date_obj.date() == today.date() and today.hour >= 17:
+                # If the date is today and it's after 6 PM, tell client to try again.
+                print("You cannot book an appointment for today as it is past 5pm! Please try again.")
             
-            if date_obj.date() >= today.date():
+            else:
                 date_selection = True
         
         except ValueError as ve:
@@ -68,12 +113,12 @@ def get_valid_date():
     return date, date_obj
 
 
-def want_to_book(date):
+def want_to_book():
     # If they input yes, continue with booking.
     booking_selection = False
     while booking_selection == False:
         # Ask client if they would like to book an appointment for that date.
-        place_booking = input(f"Would you like to book an appointment on {date}? yes/no: ").lower()
+        place_booking = input(f"Are you ready to book an appointment? yes/no: ").lower()
 
         if place_booking == 'yes':
             booking_selection = True
@@ -176,7 +221,7 @@ def get_valid_contact():
 
 def twoDay_availability(date_obj):
     for num in range(2):
-        next_date = str(date_obj.date() + timedelta(days=num))
+        next_date = str(date_obj.date() + timedelta(days=num+1))
         next_slots = get_availability_by_date(next_date)
         print()
         print(f'####### {next_date} AVAILABILITY #######')
