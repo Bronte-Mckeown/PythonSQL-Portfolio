@@ -1,9 +1,12 @@
 import mysql.connector  # Importing the MySQL connector to enable Python to interact with the MySQL database
 from config import USER, PASSWORD, HOST  # Importing database connection details from a configuration file
-from datetime import datetime
 
 # Define a custom exception to handle database connection errors specifically.
 class DbConnectionError(Exception):
+    pass
+
+# Define a custom exception to raise error if request to delete booking doesn't do anything.
+class BookingNotFoundError(Exception):
     pass
 
 # Function to establish a connection to the database.
@@ -55,19 +58,24 @@ def _map_values(schedule, nailTech = None):
         # If nailtech specified (i.e., not None), date included (but not nail tech name).
         if nailTech:
             date = item[7].strftime('%Y-%m-%d')
-            mapped.append({'Date' : date})
+            mapped.append({'Date' : date,
+                           '12-13': 'Not Available' if item[1] else 'Available',  # Check availability for 12-1 PM slot
+                           '13-14': 'Not Available' if item[2] else 'Available',  # Check availability for 1-2 PM slot
+                            '14-15': 'Not Available' if item[3] else 'Available',  # Check availability for 2-3 PM slot
+                            '15-16': 'Not Available' if item[4] else 'Available',  # Check availability for 3-4 PM slot
+                            '16-17': 'Not Available' if item[5] else 'Available',  # Check availability for 4-5 PM slot
+                            '17-18': 'Not Available' if item[6] else 'Available',  # Check availability for 5-6 PM slot
+                           })
         # Otherwise, nail tech name is included and date isn't needed.
         else:
-            mapped.append({'Nail Stylist': item[0]})
-
-        mapped.append({  # Append a dictionary with availability information for each time slot
-            '12-13': 'Not Available' if item[1] else 'Available',  # Check availability for 12-1 PM slot
-            '13-14': 'Not Available' if item[2] else 'Available',  # Check availability for 1-2 PM slot
-            '14-15': 'Not Available' if item[3] else 'Available',  # Check availability for 2-3 PM slot
-            '15-16': 'Not Available' if item[4] else 'Available',  # Check availability for 3-4 PM slot
-            '16-17': 'Not Available' if item[5] else 'Available',  # Check availability for 4-5 PM slot
-            '17-18': 'Not Available' if item[6] else 'Available',  # Check availability for 5-6 PM slot
-        })
+            mapped.append({'Nail Stylist': item[0],
+                           '12-13': 'Not Available' if item[1] else 'Available',  # Check availability for 12-1 PM slot
+                           '13-14': 'Not Available' if item[2] else 'Available',  # Check availability for 1-2 PM slot
+                            '14-15': 'Not Available' if item[3] else 'Available',  # Check availability for 2-3 PM slot
+                            '15-16': 'Not Available' if item[4] else 'Available',  # Check availability for 3-4 PM slot
+                            '16-17': 'Not Available' if item[5] else 'Available',  # Check availability for 4-5 PM slot
+                            '17-18': 'Not Available' if item[6] else 'Available',  # Check availability for 5-6 PM slot
+                           })
 
     return mapped  # Return the list of mapped values
 
@@ -176,88 +184,87 @@ def get_nailTech_availability(nailTech):
 
     return availability  # Return the availability information in nice format.
 
-
 # Function to add new booking to DB.
 def add_booking(_date, nailTech, appointmentType, time, client, contact):
     db_name = 'nails'
     # Try to connect to database first.
     try:
         db_connection, cur = _connection_and_cur_(db_name) # Connect to database and create cursor object
-        # If connection sucessful, proceed to add booking via SQL query.
-        try:
-            query = """
-                UPDATE  nail_bookings
-                SET 
-                    `{time}` = '{appointmentType}', 
-                    `{time_id}` = '{client}', 
-                    `{time_contact}` = '{contact}'
-                WHERE bookingDate = '{date}' AND nailTech = '{nailTech}'
-                """.format(time=time, appointmentType = appointmentType, time_id=time +'-client', client=client, time_contact=time +'-contact',
-                           contact = contact, date=_date, nailTech =nailTech)
-
-            cur.execute(query)
-            db_connection.commit()
-            print(f"Success. Updated DB {db_name} with new booking.")
-            cur.close()
-
-        # If exception occurs, inform user that the connection was successful, but adding the booking wasn't.
-        except Exception:
-            raise DbConnectionError(f"Appointment booking unsuccessful: Connected to DB {db_name}, but failed to update with new booking.")
-
-        # If the connection was established, close the DB.
-        finally:
-            db_connection.close()
-            print(f"DB {db_name} connection is now closed.")
     
     # If connection unsuccessful, raise exception (and query is never attempted).
-    except Exception:
+    except Exception as e:
             raise DbConnectionError(f"Appointment booking unsuccessful: Failed to connect to DB {db_name}.")
+        
+    # If connection sucessful, proceed to add booking via SQL query.
+    try:
+        query = """
+            UPDATE  nail_bookings
+            SET 
+                `{time}` = '{appointmentType}', 
+                `{time_id}` = '{client}', 
+                `{time_contact}` = '{contact}'
+            WHERE bookingDate = '{date}' AND nailTech = '{nailTech}'
+            """.format(time=time, appointmentType = appointmentType, time_id=time +'-client', client=client, time_contact=time +'-contact',
+                        contact = contact, date=_date, nailTech =nailTech)
+
+        cur.execute(query)
+        db_connection.commit()
+        print(f"Success. Updated DB {db_name} with new booking.")
+        cur.close()
+
+    # If exception occurs, inform user that the connection was successful, but adding the booking wasn't.
+    except Exception as e:
+        raise DbConnectionError(f"Appointment booking unsuccessful: Connected to DB {db_name}, but failed to update with new booking.") from e
+
+    # If the connection was established, close the DB.
+    finally:
+        db_connection.close()
+        print(f"DB {db_name} connection is now closed.")
     
 # Function to add new booking to DB.
-def delete_booking(_date, nailTech, time, contact):
+def delete_booking(_date, time, contact):
     db_name = 'nails'
     # Try to connect to database first.
     try:
         db_connection, cur = _connection_and_cur_(db_name) # Connect to database and create cursor object
-        # If connection sucessful, proceed to add booking via SQL query.
-        try:
-            query = """
-                UPDATE  nail_bookings
-                SET 
-                    `{time}` = NULL, 
-                    `{time_id}` = NULL, 
-                    `{time_contact}` = NULL
-                WHERE bookingDate = '{date}' AND nailTech = '{nailTech}' AND `{time_contact}` = '{contact}'
-                """.format(time=time, time_id=time +'-client', time_contact=time +'-contact',
-                           date=_date, nailTech=nailTech, contact=contact)
 
-            cur.execute(query)
-
-            if cur.rowcount == 0:
-                print("There are no bookings matching those details. Please check that the date, time, nail technician's name, and your number are correct.")
-            else:
-                print(f"Success. Updated DB {db_name} deleted booking.")
-            
-            db_connection.commit()
-            cur.close()
-
-        # If exception occurs, inform user that the connection was successful, but adding the booking wasn't.
-        except Exception:
-            raise DbConnectionError(f"Appointment booking unsuccessful: Connected to DB {db_name}, but failed to update with new booking.")
-
-        # If the connection was established, close the DB.
-        finally:
-            db_connection.close()
-            print(f"DB {db_name} connection is now closed.")
-    
     # If connection unsuccessful, raise exception (and query is never attempted).
-    except Exception:
-            raise DbConnectionError(f"Appointment booking unsuccessful: Failed to connect to DB {db_name}.")
+    except Exception as e:
+            raise DbConnectionError(f"Booking not deleted. Failed to connect to DB {db_name}.") from e
+    
+    # If connection sucessful, proceed to add booking via SQL query.
+    try:
+        query = """
+            UPDATE  nail_bookings
+            SET 
+                `{time}` = NULL, 
+                `{time_id}` = NULL, 
+                `{time_contact}` = NULL
+            WHERE bookingDate = '{date}' AND `{time_contact}` = '{contact}'
+            """.format(time=time, time_id=time +'-client', time_contact=time +'-contact',
+                        date=_date, contact=contact)
+
+        cur.execute(query)
+        db_connection.commit()
+        cur.close()
+
+        # if cur.rowcount == 0:
+            # raise BookingNotFoundError("There are no bookings matching those details. Please check that the date, time, and your number are correct.")
+    
+    except Exception as e:
+        raise DbConnectionError(f"Appointment cancellation unsuccessful: Connected to DB {db_name}, but failed to cancel booking.") from e
+
+    # If the connection was established, close the DB.
+    finally:
+        db_connection.close()
+        print(f"DB {db_name} connection is now closed.")
+
 
 # If the script is run directly, execute the following code (for testing)
 if __name__ == '__main__':
+    pass
     # Call the function with a specific date for testing purposes
     # print (get_nailTech_availability('bronte'))
     # print(get_all_booking_availability('2024-06-30'))
-    # add_booking('2024-06-30', 'bronte','gel manicure', '15-16', 'Sayo', '07876347982')
-    delete_booking('2024-07-30', 'bronte', '15-16', '07876347982')
+    add_booking('2024-06-30', 'bronte','gei manicure', '15-16', 'Sayo', '07876347982')
+    delete_booking('2024-06-30', '15-16', '07876347982')
