@@ -328,6 +328,6 @@ if __name__ == '__main__':
     # now = datetime.now()
     # now_date = now.date()
     # print (get_nailTech_availability(now_date, 'bronte'))
-    print(get_all_booking_availability('2024-06-30'))
+    # print(get_all_booking_availability('2024-06-30'))
     # add_booking('2024-06-30', 'bronte','gel manicure', '15-16', 'Sayo', '07876347982')
     # delete_booking('2024-06-30', '15-16', '07876347982')
