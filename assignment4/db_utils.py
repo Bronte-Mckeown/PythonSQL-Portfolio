@@ -323,11 +323,11 @@ def delete_booking(_date, time, contact):
 
 # If the script is run directly, execute the following code (for testing)
 if __name__ == '__main__':
-    pass
+    # pass
     # Call the function with a specific date for testing purposes
     now = datetime.now()
     now_date = now.date()
-    print (get_nailTech_availability('bronte', now_date))
-    # print(get_all_booking_availability('2024-06-30'))
+    # print (get_nailTech_availability('bronte', now_date))
+    print(get_all_booking_availability('2024-07-8'))
     # add_booking('2024-06-30', 'bronte','gel manicure', '15-16', 'Sayo', '07876347982')
     # delete_booking('2024-06-30', '15-16', '07876347982')

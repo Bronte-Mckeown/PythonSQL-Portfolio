@@ -112,7 +112,7 @@ def add_new_booking(date, nailTech, appointmentType, time, client, contact):
         )
 
         response.raise_for_status()
-        return response.json()
+        print(response.json()['message'])
     
     except requests.exceptions.HTTPError:
         if response.status_code == 500:
@@ -150,8 +150,7 @@ def delete_old_booking(date, time, contact):
         )
 
         response.raise_for_status()
-        
-        return response.json()
+        print(response.json())
     
     except requests.exceptions.HTTPError:
         if response.status_code == 500:
