@@ -1,6 +1,9 @@
+-- Create and use nails data base. 
 CREATE DATABASE nails;
 USE nails;
 
+-- Create nail_bookings table with nail technician name column, a column for each time slot, a column for each time slot's client
+-- , each time slot's contact number and the booking date. Each time slot will only accept 4 types of nail appointment.
 CREATE TABLE `nail_bookings` (
   `nailTech` varchar(45) DEFAULT NULL,
   `12-13` varchar(15) DEFAULT NULL CHECK (`12-13` IN ('regular manicure', 'gel manicure', 'regular pedicure', 'gel pedicure')),
@@ -40,9 +43,13 @@ BEGIN
 END$$
 DELIMITER ;
 
-CALL `nails`.`filldates`(20240629, 20240930, 'bronte');
-CALL `nails`.`filldates`(20240629, 20240930, 'finn');
-CALL `nails`.`filldates`(20240629, 20240930, 'max');
+-- Use filldates procedure to add blank rows for bronte, finn, and max for the next three months 
+CALL `nails`.`filldates`(20240702, 20241002, 'bronte');
+CALL `nails`.`filldates`(20240702, 20241002, 'finn');
+CALL `nails`.`filldates`(20240702, 20241002, 'max');
 
+-- See all rows and columns in nail_bookings table 
 SELECT * FROM nail_bookings;
 
+-- Run the following to see your user name and host name
+SELECT user(); 
