@@ -12,6 +12,8 @@ import json
 # print a nice message to the client as a print statement rather than raise the error message from db_utils.
 # I then modified as necessary for all the other functions.
 
+# NOTE: I also used it to generate doc strings for finished functions, which I then edited as required.
+
 def get_availability_by_date(date):
     """
     Makes a request to the 'availability/date' endpoint to get booking availability by date.

@@ -1,11 +1,10 @@
 from main_utils import * # Import all functions from main utils
 
-# This main.py function enables user to make booking. It uses functions from main_utils.py.
+# This main.py function enables client to make or cancel a booking. It uses functions from main_utils.py.
 # It uses while loops to ensure valid selection at each point in the program, without needing
-# to go back to the beginning each time.
+# to go back to the beginning each time!
 
 def run():
-
     # Print welcome message to client.
     print('############################')
     print('Hello, welcome to our nail salon.')
@@ -13,35 +12,36 @@ def run():
     print()
 
     # Start by asking client if they would like to book or cancel an appointment.
-    # If they say cancel or book, it goes through that process, otherwise, the program ends.
+    # If they say cancel or book, it goes through that process, otherwise, the program ends with message.
     client_job = input("Would you like to book an appointment or cancel an appointment? (book/cancel) ")
 
     # If they want to cancel, it asks for the details needed to cancel.
     if client_job == 'cancel':
 
-        # ask for and validate input
+        # Ask for and validate input
         date, _ = get_valid_date(book = False)
         time, _ = get_valid_time(date, book = False)
         contact = get_valid_contact(book = False)
 
+        # Print to client the details they have provided for their reference
         print (f"You asked to cancel an appointment on {date} at {time}, with the following contact number: {contact}")
 
-        # call delete_old_booking from main_utils (will raise error if cancel request has no effect)
+        # Call delete_old_booking from main_utils (will raise error if cancel request has no effect)
         delete_old_booking(date, time, contact)
 
     # If they want to book, it asks the way they would like to view availability (by date or by nail tech)
     elif client_job == 'book':
 
-        # ask for and validate availability type
+        # Ask for, and validate, availability type
         availability_type = get_valid_availability_type()
 
-        # if they want it by nail tech, asks which nail tech they want to see
+        # If they want it by nail tech, asks which nail tech they want to see
         if availability_type == 'tech':
 
             # Ask for, and validate which nail technician
             nailTech = get_valid_nailTech()
 
-            # Get availability by nail tech
+            # Get availability by nail tech (from today's date)
             slots = get_availability_by_nailTech(nailTech)
 
             # Print availability to user
@@ -51,7 +51,7 @@ def run():
             print(display_availability(slots, nailTech=True))
             print()
 
-            # Ask if they want to place a booking.
+            # Ask if they want to place a booking
             place_booking = want_to_book()
 
             # If they want to place a booking, ask for details
@@ -64,16 +64,15 @@ def run():
                 # also returns datetime object of time slot start time for printing out below
                 time, start_time = get_valid_time(date)
 
-                # Check that date and time actually available
+                # Check that date and time are actually available!
                 date_availability = get_availability_by_date(date)
                 stylist_availability = next((stylist for stylist in date_availability if stylist['Nail Stylist'] == nailTech), None)
                 if stylist_availability[time] == 'Not Available':
-                    # if it's not tell user to try again
+                    # If it's not, tell user to try again
                     print ("This appointment is not available. Please try again.")
                 
-                # if it's available, allow them to continue
+                # If it's available, allow them to continue
                 else:
-
                     # Ask for, and validate which type of appointment they would like
                     appointmentType = get_valid_appointmentType()
 
@@ -89,7 +88,7 @@ def run():
                     # Print details of booking to user
                     message_booking(cust, nailTech, appointmentType, start_time)
             
-            # If they do not want to book an appointment
+            # If they do not want to book an appointment, print no booking message with next 2 days of availability
             elif place_booking == 'no':
                 message_noBooking(nailTech = True)
 
@@ -129,15 +128,15 @@ def run():
                 # also returns datetime object of time slot start time for printing out below
                 time, start_time = get_valid_time(date)
 
-                # Check that date and time actually available
+                # Check that date and time actually available!
                 date_availability = get_availability_by_date(date)
                 stylist_availability = next((stylist for stylist in date_availability if stylist['Nail Stylist'] == nailTech), None)
                 if stylist_availability[time] == 'Not Available':
-                    # if it's not tell user to try again
+                    # If it's not, tell user to try again
                     print ("This appointment is not available. Please try again.")
                 
+                # If it is, continue with booking
                 else:
-
                     # Ask for, and validate which type of appointment they would like
                     appointmentType = get_valid_appointmentType()
 
@@ -157,8 +156,9 @@ def run():
             elif place_booking == 'no':
                 message_noBooking(nailTech=False, date_obj=date_obj)
 
+    # If they don't make a valid selection, program ends and they are prompted to try again.
     else:
-        print("You did not make a valid selection. Try again.")
+        print("You did not make a valid selection. Please try again.")
 
 if __name__ == '__main__':
     run()

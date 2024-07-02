@@ -1,6 +1,8 @@
 from flask import Flask, jsonify, request
 from db_utils import get_all_booking_availability, get_nailTech_availability, add_booking, delete_booking, DbConnectionError, DbQueryError
 
+# NOTE: I used Chat GPT to generate doc strings for finished functions, which I then edited as required.
+
 # Create flask instance (i.e., API) and save to app variable
 app = Flask(__name__)
 
