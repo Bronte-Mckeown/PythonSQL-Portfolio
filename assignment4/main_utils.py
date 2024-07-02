@@ -57,9 +57,10 @@ def get_availability_by_nailTech(nailTech):
     Raises:
         HTTPError: If an HTTP error occurs during the request, prints an error message.
     """
-    # get current date so that availability is only from today's date onwards
+    # Get current date so that availability is only from today's date onwards
     now = datetime.now()
     now_date = now.date()
+
     # Try to get availability by nail tech and get response status code
     try:
         response = requests.get(
@@ -94,6 +95,8 @@ def add_new_booking(date, nailTech, appointmentType, time, client, contact):
     Raises:
         HTTPError: If an HTTP error occurs during the request, prints an error message.
     """
+
+    # Create booking dictionary based on provided input
     booking = {
         "_date": date,
         "nailTech": nailTech,
@@ -103,8 +106,8 @@ def add_new_booking(date, nailTech, appointmentType, time, client, contact):
         "contact": contact
     }
 
+    # Try to make request to API and return success message
     try:
-        # try to make request to API
         response = requests.put(
             'http://127.0.0.1:8000/booking',
             headers={'content-type': 'application/json'},
@@ -114,6 +117,7 @@ def add_new_booking(date, nailTech, appointmentType, time, client, contact):
         response.raise_for_status()
         print(response.json()['message'])
     
+    # Other wise if errors occur, print messages
     except requests.exceptions.HTTPError:
         if response.status_code == 500:
             print('Could not connect to server. The appointment was not made. Please try again or call the salon.')
@@ -135,14 +139,15 @@ def delete_old_booking(date, time, contact):
     Raises:
         HTTPError: If an HTTP error occurs during the request, prints an error message.
     """
+    # Create dictionary of booking information based on provided input
     booking = {
          "_date": date,
          "time": time,
          "contact": contact
     }
 
+    # Try to make request to API to update (cancel) booking and print success message
     try:
-        # try to make request to API
         response = requests.put(
             'http://127.0.0.1:8000/delete',
             headers={'content-type': 'application/json'},
@@ -152,6 +157,7 @@ def delete_old_booking(date, time, contact):
         response.raise_for_status()
         print(response.json()['message'])
     
+    # Other wise if errors occur, print messages
     except requests.exceptions.HTTPError:
         if response.status_code == 500:
             print(f'Could not connect to server. The booking was not cancelled. Please try again or call the salon.')
@@ -168,12 +174,13 @@ def get_valid_availability_type():
     Returns:
         str: The user's selection ('date' or 'tech').
     """
+    # While loop to ensure it keeps going until valid selection provided
     valid_selection = False
     while valid_selection == False:
         availability_type = input("Would you like to see availability by date or by nail technician? (date/tech) ").lower()
         if availability_type == 'date' or availability_type == 'tech':
             valid_selection = True
-            return availability_type
+            return availability_type # Once valid, return value
         else:
             print("That is not a valid selection. Please try again by entering 'date' or 'tech' or enter ctrl+c to exit.")
 
@@ -185,10 +192,10 @@ def display_availability(records, nailTech = False):
         records (list): A list of booking availability records.
         nailTech (bool): A flag indicating if the records are for a specific nail technician.
     """
-    # if nail teach is true, make first column 'Date'
+    # If nail teach is true, make first column 'Date'
     if nailTech:
         first_col = 'Date'
-    # otherwise, first column is 'Nail Stylist'
+    # Otherwise, first column is 'Nail Stylist'
     else:
         first_col = 'Nail Stylist'
 
@@ -197,7 +204,7 @@ def display_availability(records, nailTech = False):
         first_col, '12-13', '13-14', '14-15', '15-16', '16-17', '17-18'))
     print('-' * 105)
 
-    # print each data item.
+    # Print each data item.
     for item in records:
         print("{:<15} {:<15} {:<15} {:<15} {:<15} {:<15} {:<15} ".format(
             item[first_col], item['12-13'], item['13-14'], item['14-15'], item['15-16'], item['16-17'], item['17-18']
@@ -214,12 +221,13 @@ def get_valid_date(book = True):
     Returns:
         tuple: A tuple containing the date string and the corresponding datetime object.
     """
-    # determine string for print statements depending on whether book is true or false
+    # Determine string for print statements depending on whether book is true or false
     if book:
         print_str = "book"
     else:
         print_str = "cancel"
 
+    # While loop to ensure valid input
     valid_date = False # Set valid date to false so loop continues until valid date provided
     while valid_date == False:
 
@@ -240,16 +248,17 @@ def get_valid_date(book = True):
             if date_obj.date() < today.date():
                 # If it is, tell client to try again.
                 print (f"You cannot {print_str} an appointment in the past! Please try again or enter ctrl+c to exit.")
+            
             elif date_obj.date() == today.date() and today.hour >= 17:
                 # If the date is today and it's after 6 PM, tell client to try again.
                 print(f"You cannot {print_str} an appointment for today as it is past 5pm! Please try again or enter ctrl+c to exit.")
+            
             else:
                 valid_date = True # if it's a valid date, return true to break the loop
+                return date, date_obj # Return date string and datetime object for using later
         
         except ValueError as ve:
             print(f'You entered {date}, which is not a valid date. Please try again, with the format YYYY-MM-DD or enter ctrl+c to exit.')
-    
-    return date, date_obj # Return date string and datetime object for using later
 
 def want_to_book():
     """
@@ -259,6 +268,7 @@ def want_to_book():
     Returns:
         str: The user's response ('yes' or 'no').
     """
+    # While loop to ensure valid input
     booking_selection = False # Set booking selection to false so loop continues until valid selection provided
     while booking_selection == False:
         # Ask client if they would like to book an appointment for that date.
@@ -281,7 +291,9 @@ def get_valid_nailTech():
     Returns:
         str: The name of the selected nail technician.
     """
+    # List of valid nail techs
     nailTech_list = ['bronte', 'finn', 'max']
+    
     # Create while loop so that only valid nail tech name is allowed and keep getting them to try again
     # until they make a valid selection.
     nailTech_selection = False # Keeps loop going until valid selection made.
@@ -295,8 +307,7 @@ def get_valid_nailTech():
         elif nailTech in nailTech_list:
             # If so, break while loop and continue with booking.
             nailTech_selection = True
-
-    return nailTech
+            return nailTech
 
 def get_valid_time(date, book = True):
     """
@@ -310,16 +321,20 @@ def get_valid_time(date, book = True):
     Returns:
         tuple: A tuple containing the time slot string and the corresponding datetime object.
     """
+    # Determine print string based on whether the booking variable is set to true/false
     if book:
         print_str = 'book'
     else:
         print_str = 'cancel'
 
+    # Valid time slots
     timeslots = ['12-13', '13-14', '14-15', '15-16', '16-17', '17-18']
 
+    # While loop to ensure valid input
     time_selection = False
     # Check that the time provided is a valid time slot.
     while time_selection == False:
+        # Ask different question depending on booking BOOLEAN
         if book:
             time = input("What time? (12-13/13-14/14-15/15-16/16-17/17-18) ")
         else:
@@ -329,24 +344,28 @@ def get_valid_time(date, book = True):
         start_time_str = time.split('-')[0]
         date_time_str = date + " " + start_time_str + ":00:00"
 
-        # Define the format
-        date_time_format = '%Y-%m-%d %H:%M:%S'
-        # Convert the string to time object
-        start_time = datetime.strptime(date_time_str, date_time_format)
-
-        now = datetime.now()
+        # If the time slot isn't in time slot list, print message to user
         if time not in timeslots:
             # If not, tell user and ask them to try again.
             print ("This is not a valid time slot. Please try again or enter ctrl+c to exit.")
-        
-        elif start_time < now:
-            print (f"You cannot {print_str} a time slot in the past! Please try again or enter ctrl+c to exit.")
 
-        elif time in timeslots and start_time > now:
-            # If so, break while loop and continue with booking.
-            time_selection = True
+        # If it is in time slots, check that it isn't in the past
+        elif time in timeslots:
+            # Define the format
+            date_time_format = '%Y-%m-%d %H:%M:%S'
+            # Convert the string to time object
+            start_time = datetime.strptime(date_time_str, date_time_format)
+            now = datetime.now() # calculate time now
+            
+            # if start time is before now, print message
+            if start_time < now:
+                print (f"You cannot {print_str} a time slot in the past! Please try again or enter ctrl+c to exit.")
 
-    return(time, start_time)
+            # if start time is after now, break loop
+            elif start_time > now:
+                # If so, break while loop and continue with booking.
+                time_selection = True
+                return(time, start_time)
 
 def get_valid_appointmentType():
     """
@@ -356,16 +375,19 @@ def get_valid_appointmentType():
     Returns:
         str: The selected appointment type.
     """
+    # List of valid appointment types
     appointmentType_list = ['regular manicure', 'gel manicure', 'regular pedicure', 'gel pedicure']
+    
+    # Use while loop to ensure valid input
     appointmentType_selection = False
     while appointmentType_selection == False:
         mani_ped = input ("Would you like a manicure or pedicure? (manicure/pedicure) ").lower()
         type = input("Would you like regular or gel? (regular/gel) ").lower()
 
-        appointmentType = type + " " + mani_ped
+        appointmentType = type + " " + mani_ped # Join two inputs together to form appointment type
 
-        if appointmentType not in appointmentType_list:
-            
+        # Check it against list and only break loop if it is
+        if appointmentType not in appointmentType_list:   
             print (f"{appointmentType} is not a valid appointment type. Please try again or enter ctrl+c to exit.")
         
         elif appointmentType in appointmentType_list:
@@ -373,8 +395,6 @@ def get_valid_appointmentType():
 
     return appointmentType
 
-
-# Helper function to check phone number provided contains only digits
 # https://stackoverflow.com/questions/21388541/how-do-you-check-in-python-whether-a-string-contains-only-numbers
 def check_digits(contact):
     """
@@ -386,8 +406,10 @@ def check_digits(contact):
     Returns:
         bool: True if the phone number contains only digits, False otherwise.
     """
+    # Loop over provided string
     for ch in contact:
         if not ch in string.digits:
+            # Return false if any characters are NOT digits
             return False
     return True
 
@@ -402,16 +424,20 @@ def get_valid_contact(book = True):
     Returns:
         str: The validated phone number.
     """
+    # While loop to ensure valid input
     valid_number = False
     while valid_number == False:
+        # Use book variable to determine specific question wording
         if book:
             contact = input("Please enter your phone number: ")
         else:
             contact = input("Please enter the phone number you provided upon booking: ")
 
+        # If the number isn't 11 digits long or isn't all digits, return false and continue loop
         if len(contact) != 11 or check_digits(contact) == False:
             print ("This is not a valid phone number. It must be 11 DIGITS long. Please try again or enter ctrl+c to exit.")
         
+        # Otherwise, break loop and return contact
         elif len(contact) == 11 and check_digits(contact) == True:
             valid_number = True
     return contact
@@ -426,6 +452,7 @@ def message_booking(cust, nailTech, appointmentType, start_time):
         appointmentType (str): The type of appointment.
         start_time (datetime): The start time of the appointment.
     """
+    # Print custom message
     print (f"Thanks {cust}, booking confirmed with {nailTech} for a {appointmentType} on {start_time.date()} at {start_time.time()}. See you soon!")
 
 def message_noBooking(nailTech = False, date_obj = None):
@@ -437,10 +464,12 @@ def message_noBooking(nailTech = False, date_obj = None):
         date_obj (datetime): The date object representing the date for which availability is to be shown.
     """
     print()
+    # If nail tech availability option selected, provide info for all nail techs for next two days (from today's date)
     if nailTech:
         date = datetime.now()
         print (f"You have selected not to book an appointment. For your reference, here is the availability for all nail techs for the next 2 days.")
         twoDay_availability(date)
+    # Otherwise, provide info for all nail nail techs for the next two days (from user-provided date)
     else:
         date = date_obj
         print (f"You have selected not to book an appointment. For your reference, here is the availability for all nail techs for the next 2 days.")
@@ -454,6 +483,7 @@ def twoDay_availability(date_obj):
     Args:
         date_obj (datetime): The date object representing the starting date for showing availability.
     """
+    # Loop over range of 2 to present availability for next two days from provided date
     for num in range(2):
         next_date = str(date_obj.date() + timedelta(days=num+1))
         next_slots = get_availability_by_date(next_date)
