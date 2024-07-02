@@ -12,8 +12,19 @@ import json
 # print a nice message to the client as a print statement rather than raise the error message from db_utils.
 # I then modified as necessary for all the other functions.
 
-# function that makes request to 'availability/date' endpoint to get booking availability by date
 def get_availability_by_date(date):
+    """
+    Makes a request to the 'availability/date' endpoint to get booking availability by date.
+
+    Args:
+        date (str): The date for which availability is being requested, formatted as 'YYYY-MM-DD'.
+
+    Returns:
+        dict: The JSON response from the server containing booking availability.
+
+    Raises:
+        HTTPError: If an HTTP error occurs during the request, prints an error message.
+    """
     # Try to get availability by date and get response status code
     try:
         response = requests.get(
@@ -30,9 +41,21 @@ def get_availability_by_date(date):
         else:
             print(f'There was a problem with that request (error code: {response.status_code}). Please try again or call the salon.')
 
-# function that makes request to 'availability/nailTech' endpoint to get booking availability by nail tech
-def get_availability_by_nailTech(nailTech):
 
+def get_availability_by_nailTech(nailTech):
+    """
+    Makes a request to the 'availability/nailTech' endpoint to get booking availability by nail technician.
+
+    Args:
+        nailTech (str): The name of the nail technician.
+
+    Returns:
+        dict: The JSON response from the server containing the nail technician's availability.
+
+    Raises:
+        HTTPError: If an HTTP error occurs during the request, prints an error message.
+    """
+    # get current date so that availability is only from today's date onwards
     now = datetime.now()
     now_date = now.date()
     # Try to get availability by nail tech and get response status code
@@ -51,9 +74,24 @@ def get_availability_by_nailTech(nailTech):
         else:
             print(f'There was a problem with that request (error code: {response.status_code}). Please try again or call the salon.')
 
-# function that makes request to 'booking' endpoint to make new appointment
 def add_new_booking(date, nailTech, appointmentType, time, client, contact):
+    """
+    Makes a request to the 'booking' endpoint to make a new appointment.
 
+    Args:
+        date (str): The date of the booking.
+        nailTech (str): The name of the nail technician.
+        appointmentType (str): The type of appointment.
+        time (str): The time slot for the appointment.
+        client (str): The name of the client.
+        contact (str): The contact number of the client.
+
+    Returns:
+        dict: The JSON response from the server confirming the booking.
+
+    Raises:
+        HTTPError: If an HTTP error occurs during the request, prints an error message.
+    """
     booking = {
         "_date": date,
         "nailTech": nailTech,
@@ -72,7 +110,6 @@ def add_new_booking(date, nailTech, appointmentType, time, client, contact):
         )
 
         response.raise_for_status()
-
         return response.json()
     
     except requests.exceptions.HTTPError:
@@ -81,9 +118,21 @@ def add_new_booking(date, nailTech, appointmentType, time, client, contact):
         else:
             print(f'There was a problem with that request (error code: {response.status_code}). The appointment was not made. Please try again or call the salon.')
 
-# function to make request to 'delete' endpoint to delete existing appointment
 def delete_old_booking(date, time, contact):
+    """
+    Makes a request to the 'delete' endpoint to delete an existing appointment.
 
+    Args:
+        date (str): The date of the booking.
+        time (str): The time slot of the appointment.
+        contact (str): The contact number of the client.
+
+    Returns:
+        dict: The JSON response from the server confirming the deletion.
+
+    Raises:
+        HTTPError: If an HTTP error occurs during the request, prints an error message.
+    """
     booking = {
          "_date": date,
          "time": time,
@@ -103,8 +152,6 @@ def delete_old_booking(date, time, contact):
         return response.json()
     
     except requests.exceptions.HTTPError:
-        # Extract error message from response
-        error_message = response.json().get('error', 'Unknown error')
         if response.status_code == 500:
             print(f'Could not connect to server. The booking was not cancelled. Please try again or call the salon.')
         elif response.status_code == 400:
@@ -112,8 +159,14 @@ def delete_old_booking(date, time, contact):
         else:
             print(f'The booking was not cancelled (error code: {response.status_code}). Please try again or call the salon.')
             
-        
 def get_valid_availability_type():
+    """
+    Prompts the user to select whether they want to see availability by date or by nail technician.
+    Keeps going until they made a valid selection.
+
+    Returns:
+        str: The user's selection ('date' or 'tech').
+    """
     valid_selection = False
     while valid_selection == False:
         availability_type = input("Would you like to see availability by date or by nail technician? (date/tech) ").lower()
@@ -123,8 +176,14 @@ def get_valid_availability_type():
         else:
             print("That is not a valid selection. Please try again by entering 'date' or 'tech' or enter ctrl+c to exit.")
 
-# function that formats returned availability from API endpoint for printing out to user
 def display_availability(records, nailTech = False):
+    """
+    Formats and prints booking availability records for the user.
+
+    Args:
+        records (list): A list of booking availability records.
+        nailTech (bool): A flag indicating if the records are for a specific nail technician.
+    """
     # if nail teach is true, make first column 'Date'
     if nailTech:
         first_col = 'Date'
@@ -143,9 +202,17 @@ def display_availability(records, nailTech = False):
             item[first_col], item['12-13'], item['13-14'], item['14-15'], item['15-16'], item['16-17'], item['17-18']
         ))
 
-# Function that adds user for what date they would like to book an appointment for / cancel and makes sure it's valid
 def get_valid_date(book = True):
+    """
+    Prompts the user to enter a date for booking or canceling an appointment.
+    Keeps going until they made a valid selection.
 
+    Args:
+        book (bool): A flag indicating if the function is being used for booking (True) or canceling (False).
+
+    Returns:
+        tuple: A tuple containing the date string and the corresponding datetime object.
+    """
     # determine string for print statements depending on whether book is true or false
     if book:
         print_str = "book"
@@ -183,8 +250,14 @@ def get_valid_date(book = True):
     
     return date, date_obj # Return date string and datetime object for using later
 
-# Function that asks user if they want to book an appointment
 def want_to_book():
+    """
+    Prompts the user to confirm if they want to book an appointment.
+    Keeps going until they made a valid selection.
+
+    Returns:
+        str: The user's response ('yes' or 'no').
+    """
     booking_selection = False # Set booking selection to false so loop continues until valid selection provided
     while booking_selection == False:
         # Ask client if they would like to book an appointment for that date.
@@ -200,6 +273,13 @@ def want_to_book():
     return place_booking
 
 def get_valid_nailTech():
+    """
+    Prompts the user to select a valid nail technician.
+    Keeps going until they made a valid selection.
+
+    Returns:
+        str: The name of the selected nail technician.
+    """
     nailTech_list = ['bronte', 'finn', 'max']
     # Create while loop so that only valid nail tech name is allowed and keep getting them to try again
     # until they make a valid selection.
@@ -218,7 +298,17 @@ def get_valid_nailTech():
     return nailTech
 
 def get_valid_time(date, book = True):
+    """
+    Prompts the user to select a valid time slot for booking or canceling an appointment.
+    Keeps going until they made a valid selection.
 
+    Args:
+        date (str): The date of the booking.
+        book (bool): A flag indicating if the function is being used for booking (True) or canceling (False).
+
+    Returns:
+        tuple: A tuple containing the time slot string and the corresponding datetime object.
+    """
     if book:
         print_str = 'book'
     else:
@@ -258,6 +348,13 @@ def get_valid_time(date, book = True):
     return(time, start_time)
 
 def get_valid_appointmentType():
+    """
+    Prompts the user to select a valid appointment type.
+    Keeps going until they made a valid selection.
+
+    Returns:
+        str: The selected appointment type.
+    """
     appointmentType_list = ['regular manicure', 'gel manicure', 'regular pedicure', 'gel pedicure']
     appointmentType_selection = False
     while appointmentType_selection == False:
@@ -279,13 +376,31 @@ def get_valid_appointmentType():
 # Helper function to check phone number provided contains only digits
 # https://stackoverflow.com/questions/21388541/how-do-you-check-in-python-whether-a-string-contains-only-numbers
 def check_digits(contact):
+    """
+    Checks if the provided phone number contains only digits.
+
+    Args:
+        contact (str): The phone number to check.
+
+    Returns:
+        bool: True if the phone number contains only digits, False otherwise.
+    """
     for ch in contact:
         if not ch in string.digits:
             return False
     return True
 
 def get_valid_contact(book = True):
+    """
+    Prompts the user to enter a valid phone number.
+    Keeps going until they made a valid selection.
 
+    Args:
+        book (bool): A flag indicating if the function is being used for booking (True) or canceling (False).
+
+    Returns:
+        str: The validated phone number.
+    """
     valid_number = False
     while valid_number == False:
         if book:
@@ -301,9 +416,25 @@ def get_valid_contact(book = True):
     return contact
 
 def message_booking(cust, nailTech, appointmentType, start_time):
+    """
+    Prints a booking confirmation message.
+
+    Args:
+        cust (str): The name of the customer.
+        nailTech (str): The name of the nail technician.
+        appointmentType (str): The type of appointment.
+        start_time (datetime): The start time of the appointment.
+    """
     print (f"Thanks {cust}, booking confirmed with {nailTech} for a {appointmentType} on {start_time.date()} at {start_time.time()}. See you soon!")
 
 def message_noBooking(nailTech = False, date_obj = None):
+    """
+    Prints a message indicating no booking was made and displays availability for the next two days.
+
+    Args:
+        nailTech (bool): A flag indicating if the availability is for a specific nail technician.
+        date_obj (datetime): The date object representing the date for which availability is to be shown.
+    """
     print()
     if nailTech:
         date = datetime.now()
@@ -315,8 +446,13 @@ def message_noBooking(nailTech = False, date_obj = None):
         twoDay_availability(date)
     print("If you would still like to book another appointment, please just start again!")
    
-
 def twoDay_availability(date_obj):
+    """
+    Displays availability for all nail technicians for the next two days.
+
+    Args:
+        date_obj (datetime): The date object representing the starting date for showing availability.
+    """
     for num in range(2):
         next_date = str(date_obj.date() + timedelta(days=num+1))
         next_slots = get_availability_by_date(next_date)
