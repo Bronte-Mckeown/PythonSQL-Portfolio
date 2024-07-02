@@ -184,7 +184,7 @@ def get_nailTech_availability(nailTech, date):
             query = """
                 SELECT  nailTech, `12-13`, `13-14`, `14-15`, `15-16`, `16-17`, `17-18`, `bookingDate`
                 FROM nail_bookings 
-                WHERE nailTech = '{}' AND bookingDate > '{}'
+                WHERE nailTech = '{}' AND bookingDate >= '{}'
                 LIMIT 7
                 """.format(nailTech, date)
 
@@ -325,9 +325,9 @@ def delete_booking(_date, time, contact):
 if __name__ == '__main__':
     pass
     # Call the function with a specific date for testing purposes
-    # now = datetime.now()
-    # now_date = now.date()
-    # print (get_nailTech_availability(now_date, 'bronte'))
+    now = datetime.now()
+    now_date = now.date()
+    print (get_nailTech_availability('bronte', now_date))
     # print(get_all_booking_availability('2024-06-30'))
     # add_booking('2024-06-30', 'bronte','gel manicure', '15-16', 'Sayo', '07876347982')
     # delete_booking('2024-06-30', '15-16', '07876347982')
