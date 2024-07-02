@@ -1,8 +1,9 @@
 # NOTE: Chat GPT used to create doc strings for each finished function, which are then edited for accuracy.
 
 import mysql.connector  # Import the MySQL connector to enable Python to interact with the MySQL database
-from config import USER, PASSWORD, HOST  # Import database connection details from configuration file
 from datetime import datetime # for testing
+
+from config import USER, PASSWORD, HOST  # Import database connection details from configuration file
 
 # Define a custom exception to handle database connection errors.
 class DbConnectionError(Exception):
