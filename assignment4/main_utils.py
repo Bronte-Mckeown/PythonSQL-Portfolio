@@ -150,7 +150,7 @@ def delete_old_booking(date, time, contact):
         )
 
         response.raise_for_status()
-        print(response.json())
+        print(response.json()['message'])
     
     except requests.exceptions.HTTPError:
         if response.status_code == 500:
