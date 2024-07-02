@@ -2,6 +2,7 @@
 
 import mysql.connector  # Import the MySQL connector to enable Python to interact with the MySQL database
 from config import USER, PASSWORD, HOST  # Import database connection details from configuration file
+from datetime import datetime # for testing
 
 # Define a custom exception to handle database connection errors.
 class DbConnectionError(Exception):
@@ -148,7 +149,7 @@ def get_all_booking_availability(_date):
 
     return availability  # Return the availability information in nice format
 
-def get_nailTech_availability(nailTech):
+def get_nailTech_availability(nailTech, date):
     """
     This function retrieves the booking availability for a specific nail technician from the database.
     It connects to the database, executes a query to fetch the nail tech data, maps the results
@@ -183,9 +184,9 @@ def get_nailTech_availability(nailTech):
             query = """
                 SELECT  nailTech, `12-13`, `13-14`, `14-15`, `15-16`, `16-17`, `17-18`, `bookingDate`
                 FROM nail_bookings 
-                WHERE nailTech = '{}'
+                WHERE nailTech = '{}' AND bookingDate > '{}'
                 LIMIT 7
-                """.format(nailTech)
+                """.format(nailTech, date)
 
             cur.execute(query)  # Execute the SQL query
             result = cur.fetchall()  # Fetch all results from the executed query, which returns a list of tuples
@@ -324,7 +325,9 @@ def delete_booking(_date, time, contact):
 if __name__ == '__main__':
     pass
     # Call the function with a specific date for testing purposes
-    # print (get_nailTech_availability('bronte'))
-    # print(get_all_booking_availability('2024-06-30'))
+    # now = datetime.now()
+    # now_date = now.date()
+    # print (get_nailTech_availability(now_date, 'bronte'))
+    print(get_all_booking_availability('2024-06-30'))
     # add_booking('2024-06-30', 'bronte','gel manicure', '15-16', 'Sayo', '07876347982')
     # delete_booking('2024-06-30', '15-16', '07876347982')
