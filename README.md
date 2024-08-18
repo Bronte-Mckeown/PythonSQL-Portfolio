@@ -1,18 +1,25 @@
-# CFG Assignments
+# Portfolio
 
-### About me
+## About me
 
-#### Background
-My name is Dr. Bronte Mckeown and I have a background in Psychology and Neuroscience. I completed my PhD in Neuroscience at the University of York in September 2022, and then carried on my research in Canada for 18 months! Having returned to the UK, I have recently started a new freelance role back at the National Institute of Teaching, which I absolutely love. I am *super* excited to complete the CFGdegree as I hope it will improve both my technical skills and my confidence.
+### Background
+My name is Dr. Bronte Mckeown and I have a background in Psychology and Neuroscience. I completed my PhD in Neuroscience at the University of York in September 2022, and then carried on my research in Canada for 18 months! Having returned to the UK, I have worked as a freelance data analyst at the National Institute of Teaching.
 
-#### Links to find out more about my research
+### Links to find out more about my research
 - [LinkedIn](www.linkedin.com/in/bronte-mckeown)
 - [Google Scholar](https://scholar.google.com/citations?user=5HWZCp0AAAAJ&hl=en)
 - [Latest study](https://www.researchsquare.com/article/rs-4131471/v1)
 
-### Assignment 1
+## This repo
+This repo contains my 4 assignments for my data science degree. 
+- Assignment 1 focused on showcasing git skills, including creating a readME (see below).
+- Assignment 2 focused on showcasing Python skills, including use of an API.
+- Assignment 3 focused on showcasing SQL skills, including designing and creating a database, and using, querying, and updating databases in SQL.
+- Assignment 4 focused on showcasing the design and implementation of a web API and SQL database.
 
-#### Part 1
+## Assignment 1
+
+### Part 1
 Part 1 is worth **14 marks**. These 14 marks are awarded for: "Demonstration of setting up GitHub and use of README."
 
 Specifically, I need to:
@@ -31,7 +38,7 @@ Specifically, I need to:
   - [x] Images
   - [x] Relative links to files in repo
 
-#### Part 2
+### Part 2
 
 Part 2 is also worth **14 marks**. These 14 marks are awarded for: "Knowledge and demonstrated use of GitHub commands."
 
@@ -45,7 +52,7 @@ Specifically, I need to demonstrate:
 - [x] .gitignore file (with explanation)
 - [x] requirements.txt file (with explanation)
 
-#### My chosen project to demonstrate Part 2 knowledge
+### My chosen project to demonstrate Part 2 knowledge
 
 To demonstrate the skills required for Part 2, I have used Python to run a correlation analysis on some made-up data and visualise the correlation with a scatter plot. I've documented these steps, with screenshots.
 
